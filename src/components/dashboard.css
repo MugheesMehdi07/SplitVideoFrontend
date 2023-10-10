@@ -1,0 +1,58 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+.parent1{
+    background-color: #E4E8F0;
+    height: 100vh;
+    padding: 5px 5px 5px 5px;
+    /* overflow: hidden;
+    box-sizing: border-box; */
+}
+.parent-container{
+    display: flex; /* Use flexbox to center vertically and horizontally */
+    justify-content: center; /* Center horizontally */
+    align-items: center;
+    background-color: white; 
+    border-radius: 10px;
+    margin: 10px;
+    margin-top: 20px;
+    padding:40px;
+    
+}
+.child-container{
+    background-color: white;
+    width:50%;
+}
+.parent-container2{
+    display: flex; /* Use flexbox to center vertically and horizontally */
+    justify-content: center; /* Center horizontally */
+    align-items: center;
+    background-color: white; 
+    border-radius: 10px;
+    margin: 10px;
+    margin-top: 20px;
+    padding:40px;
+    height: 550px;
+}
+input[type=file]::-webkit-file-upload-button {
+    width: 0;
+    padding: 0;
+    -webkit-appearance: none;
+    border: none;
+    border:0px;
+}
+.file-button{
+    display: block;
+    background-color: #0A2F73;
+    color:white;
+    height:100%;
+    border-radius: 5px;
+    padding-top: 6px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+.wrapper{
+padding:20px;
+} 
