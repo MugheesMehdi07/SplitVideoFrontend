@@ -5,8 +5,9 @@ html, body {
   }
 .parent1{
     background-color: #E4E8F0;
-    height: 100vh;
+    /* background-color: black; */
     padding: 5px 5px 5px 5px;
+    height: 100vh;
     /* overflow: hidden;
     box-sizing: border-box; */
 }
@@ -19,23 +20,17 @@ html, body {
     margin: 10px;
     margin-top: 20px;
     padding:40px;
-    
+    min-height: 95vh;
+    max-height: 95vh;
 }
 .child-container{
     background-color: white;
-    width:50%;
+    width:80%;
+    min-height: 80vh;
+    max-height: 90vh;
+    
 }
-.parent-container2{
-    display: flex; /* Use flexbox to center vertically and horizontally */
-    justify-content: center; /* Center horizontally */
-    align-items: center;
-    background-color: white; 
-    border-radius: 10px;
-    margin: 10px;
-    margin-top: 20px;
-    padding:40px;
-    height: 550px;
-}
+
 input[type=file]::-webkit-file-upload-button {
     width: 0;
     padding: 0;
@@ -56,3 +51,19 @@ input[type=file]::-webkit-file-upload-button {
 .wrapper{
 padding:20px;
 } 
+
+.helping-text{
+margin-left: 5px;
+}
+.child-container2{
+    margin-top: -100px;
+    min-height: 50vh;
+    width: 50%;
+    
+}
+#custom-select{
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  top: 0;
+}

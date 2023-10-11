@@ -6,6 +6,26 @@ export function ProcesVideos(params) {
     const headers = {
       'Content-Type': 'multipart/form-data',
     };
+    const config = {
+      headers,
+      responseType: 'blob',
+    };
     console.log('in process video api main video', params.get('mainVideo'))
-    return axios.post(Dev_Url, params, {headers});
+    return axios.post(Dev_Url, params, config);
+}
+
+export function UploadMainVideo(params) {
+
+  const headers = {
+    'Content-Type': 'multipart/form-data',
+  };
+  return axios.post(Dev_Url + "uploadmainvideo/", params, {headers});
+}
+
+export function UploadOverlayVideo(params) {
+
+  const headers = {
+    'Content-Type': 'multipart/form-data',
+  };
+  return axios.post(Dev_Url + "uploadoverlayvideo/", params, {headers});
 }
