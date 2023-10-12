@@ -61,9 +61,3 @@ margin-left: 5px;
     width: 50%;
     
 }
-#custom-select{
-  position: absolute;
-  z-index: 1;
-  width: 100%;
-  top: 0;
-}

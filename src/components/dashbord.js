@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './dashboard.css';
 import {ProcesVideos, UploadMainVideo, UploadOverlayVideo} from "../api's/network.js";
 import useSweetAlert from "../alerts/useSweetAlert.jsx";
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
 
 
@@ -20,31 +21,16 @@ const Dash = () => {
     const [overlayFileUploading, setOverlayFileUploading] = useState('');
     const navigate = useNavigate();
     const [showFileUploadedText, setShowFileUploadedText] = useState(false);
-    const [showOverlayFileUploadedText, setShowOverlayFileUploadedText] = useState(false)
+    const [showOverlayFileUploadedText, setShowOverlayFileUploadedText] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [showProgressBar, setShowProgressBar] = useState(false); // Flag to show/hide the progress bar
 
 
 
     useEffect(() => {
-    // const customSelect = document.getElementById("customselect");
-
-    // customSelect.addEventListener("focus", function () {
-    //     this.size = 5;
-    // });
-
-    // customSelect.addEventListener("change", function () {
-    //     this.blur();
-    // });
-
-    // customSelect.addEventListener("blur", function () {
-    //     this.size = 1;
-    //     this.blur();
-    // });
 
     }, [])
-    function toggleDropdown() {
-        const dropdownOptions = document.getElementById("custom-dropdown-options");
-        dropdownOptions.classList.toggle("show");
-      }
+  
       
 
     const handleMainFileInputChange = (e) => {
@@ -53,12 +39,17 @@ const Dash = () => {
         setMainFileUploading('uploading....')
         setShowFileUploadedText(true);
         formData.append('mainVideo', selectedFile);
+        setShowProgressBar(true);
+        setTimeout(() => {
+                        setProgress(5)   
+                    }, 10000);
         UploadMainVideo(formData)
         .then((res) =>{
             if (res.data.success === true){
                 setMainFileUploading('file successfully uploaded')
                 if (res.data.data) {
                     setMainVideo(res.data.data);
+                    setProgress(20)
                     setTimeout(() => {
                         setShowFileUploadedText(false);
                         setMainFileUploading('')
@@ -80,12 +71,14 @@ const Dash = () => {
         setOverlayFileUploading('uploading....')
         setShowOverlayFileUploadedText(true);
         formData.append('overlayVideo', selectedFile);
+        setShowProgressBar(true);
         UploadOverlayVideo(formData)
         .then((res) =>{
             if (res.data.success === true){
                 setOverlayFileUploading('File successfully uploaded')
                 if (res.data.data) {
                     setOverlayVideo(res.data.data);
+                    setProgress(45)
                     setTimeout(() => {
                         setShowOverlayFileUploadedText(false);
                         setOverlayFileUploading('');
@@ -105,7 +98,7 @@ const Dash = () => {
     const handleSubmit = (e) =>{
         console.log('in handle submit', e.target.value)
         e.preventDefault();
-
+        if (mainVideo && overlayVideo && variations){
         const formData = new FormData();
         console.log('in handle submit mainvideo', mainVideo)
         console.log('in handle submit overlay video', overlayVideo)
@@ -114,17 +107,25 @@ const Dash = () => {
         formData.append('variations', variations);
         formData.append('style', style);
         console.log('form data in submit handle', formData)
+        
+        
         ProcesVideos(formData)
         .then((res) => {
             const binaryData = res.data;
+            setProgress(100)
             navigate('/downloader', {state: {data: binaryData }}); 
-                
+            setShowProgressBar(false);    
         }).catch((err) => {
             showAlert('error', {
                 title: err.message
                 
             })
         })
+    }else{
+        showAlert('error', {
+            title: 'all fields are required'     
+        })
+    }
     }
     
 
@@ -136,8 +137,11 @@ const Dash = () => {
             <h6 style={{textAlign: 'center', color: '#0A2F73', fontFamily:'Plus Jakarta Sans'}}>CONTENT ROLLER</h6>
             <h3 style={{textAlign: 'center', color: '#0A2F73'}}>UPLOAD FILES</h3>
             <form className='m-5'>
-            <div style={{textAlign: 'center', color: '#0A2F73'}}><label><b>Upload main video (Short):</b></label></div>
+            <div style={{textAlign: 'center', color: '#0A2F73'}}><label><b>Upload main video (Short):<span style={{color:'red'}}></span></b></label></div>
                 <div className="form-group" style={{marginLeft: '200px', display: 'flex'}}>
+                
+                
+
                     <div className='input-group' style={{width:'70%'}}>
                         <input
                                 type="text"
@@ -195,16 +199,16 @@ const Dash = () => {
                         onChange={(e) => setVariations(e.target.value)}
                         >
                             <option value="" hidden></option>
-                            <option value="1">1 variation</option>
-                            <option value="2">2 variations</option>
-                            <option value="3">3 variations</option>
-                            <option value="4">4 variations</option>
-                            <option value="5">5 variations</option>
-                            <option value="6">6 variations</option>
-                            <option value="7">7 variations</option>
-                            <option value="8">8 variations</option>
-                            <option value="9">9 variations</option>
-                            <option value="10">10 variations</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
                         </select>  
                         </div>
                         
@@ -212,7 +216,7 @@ const Dash = () => {
                 <div className="form-group">
                     <div><label style={{color: '#E3E8F2'}}>select style:</label></div>
                         <div className="input-group">
-                        <select  onChange={(e) => setStyle(e.target.value)} size='1' style={{
+                        <select className='form-select' onChange={(e) => setStyle(e.target.value)} size='1' style={{
                             minHeight:'40px',
                             width:'100%',
                             borderRadius:'5px',
@@ -224,11 +228,18 @@ const Dash = () => {
                         </div>
                 </div>
                 
-                </div>
                 <div className='container mt-3' style={{textAlign:'center'}}>
+                
                 <button type='button' className='btn btn-light' style={{border: '1px solid #D9D9D9', borderRadius:'10px' , marginRight: '10px', backgroundColor:'#D9D9D9', color: 'white' }}><b>Cancel</b></button>
                 <button type='button' onClick={handleSubmit} className='btn btn-light' style={{border: '1px solid #00B884', borderRadius:'10px' , backgroundColor:'#00B884', color: 'white'}} disabled={!mainVideo || !overlayVideo}><b>Generate Variations</b></button>
                 </div>
+                </div>
+                 {showProgressBar && (
+                    <div className='mt-3' style={{width: '70%', textAlign: 'center', marginLeft: '130px'}}> 
+                                <ProgressBar now={progress} label={`${progress}%` } variant = "success"/>
+                                <p>Processing Videos</p>
+                                </div>
+                            )}
                 </form>
                 
                     
