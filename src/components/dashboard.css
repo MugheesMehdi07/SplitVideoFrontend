@@ -61,3 +61,36 @@ margin-left: 5px;
     width: 50%;
     
 }
+.no-pointer-events:active {
+    pointer-events: none;
+  }
+
+  @media screen and (max-width: 768px) {
+    .parent-container {
+      padding: 20px; /* Adjust padding for smaller screens */
+    }
+    .child-container {
+      width: 100%; /* Take up full width on smaller screens */
+    }
+  }
+  
+  /* CSS for Tablets */
+  @media screen and (min-width: 769px) and (max-width: 1024px) {
+    .parent-container {
+      padding: 40px; /* Adjust padding for tablet screens */
+    }
+    .child-container {
+      width: 80%; /* Use a percentage for the container width */
+    }
+  }
+  
+  /* CSS for Larger Screens */
+  @media screen and (min-width: 1025px) {
+    .parent-container {
+      padding: 60px; /* Adjust padding for larger screens */
+    }
+    .child-container {
+      width: 60%; /* Use a percentage for the container width */
+    }
+  }
+  

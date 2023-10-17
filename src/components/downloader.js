@@ -74,7 +74,7 @@ const Downloader = () => {
             <h3 style={{textAlign: 'center', color: '#0A2F73'}}>DOWNLOAD FILES</h3>
                 <div className="form-group m-3">
                         <div className="input-group">
-                            <input type="text" className="form-control" value={filename} style={{borderBlockStyle: 'dotted', textAlign: 'center'}}/>    
+                            <input type="text" className="form-control" value={filename} style={{borderBlockStyle: 'dotted', textAlign: 'center'}} readOnly/>    
                         </div> 
                     </div>
                 <div className='container mt-3' style={{textAlign:'center'}}>
