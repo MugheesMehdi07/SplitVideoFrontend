@@ -1,6 +1,6 @@
 import axios from "axios";
 const Dev_Url = "http://127.0.0.1:8000/"
-const prod_url = "videoprocessingbackend.rootpointers.net/"
+const prod_url = "http://videoprocessingbackend.rootpointers.net/"
 export function ProcesVideos(params) {
 
     const headers = {
@@ -11,7 +11,7 @@ export function ProcesVideos(params) {
       responseType: 'blob',
     };
     console.log('in process video api main video', params.get('mainVideo'))
-    return axios.post(prod_url, params, config);
+    return axios.post(prod_url + "generatevariations/", params, config);
 }
 
 export function UploadMainVideo(params) {
