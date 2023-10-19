@@ -138,10 +138,11 @@ const Dash = () => {
                 setShowProgressBar(false);    
             })
             .catch((err) => {
+                console.log('error in generate variation', err)
                 showAlert('error', {
-                    title: err.message
-                    
+                    title: err.message   
                 })
+                setShowProgressBar(false);
             })
         }
         else{
