@@ -7,6 +7,7 @@ import {ProcesVideos, UploadMainVideo, UploadOverlayVideo, checkTaskStatusApi, g
 import useSweetAlert from "../alerts/useSweetAlert.jsx";
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import AWS from 'aws-sdk';
+import axios from "axios";
 
 
 
@@ -149,7 +150,14 @@ const Dash = () => {
                           setProgress(prevProgress => prevProgress + 60);
                           const splitVideoUrls = response.data.data;
 
-                          generateZip(splitVideoUrls)
+                          axios({
+                            method: 'post',
+                            url: 'http://videoprocessingbackend.rootpointers.net/generatezip/',
+                            responseType: 'blob',
+                            data: {
+                              file_urls: splitVideoUrls
+                            },
+                        })
                           .then((response) => {
                             console.log('response of generate zip', response)
                             setProgress(prevProgress => prevProgress + 10);
@@ -164,9 +172,12 @@ const Dash = () => {
                                 title: err.message
                               });
                             });
-                        }
+                      
+                        
+                        
                       } else {
-                          setTimeout(checkStatus(taskId), 10000);
+                        setTimeout(checkStatus(taskId), 10000);
+                           } 
                       }
                   })
                 
