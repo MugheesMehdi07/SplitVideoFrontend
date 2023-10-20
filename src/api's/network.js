@@ -35,11 +35,20 @@ export function generateZip(fileurls) {
   const headers = {
     'Content-Type': 'application/json',
   };
-  // const config = {
-  //     headers,
-  //     responseType: 'blob',
-  //   };
+
  
-  console.log('in generate zip api')
   return axios.post(prod_url + "generatezip/", params, {headers});
+}
+
+export function checkZipStatusApi(taskId) {
+  const params = {
+    'task_id': taskId
+  }
+
+  const config = {
+    responseType: 'blob', 
+  };
+
+ 
+  return axios.post(prod_url + "checkzipstatus/", params, config);
 }

@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate, useHistory } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './dashboard.css';
-import {ProcesVideos, UploadMainVideo, UploadOverlayVideo, checkTaskStatusApi, generateZip} from "../api's/network.js";
+import {ProcesVideos, UploadMainVideo, UploadOverlayVideo, checkTaskStatusApi, generateZip, checkZipStatusApi} from "../api's/network.js";
 import useSweetAlert from "../alerts/useSweetAlert.jsx";
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import AWS from 'aws-sdk';
@@ -142,6 +142,20 @@ const Dash = () => {
             }
           };
 
+          const checkZipStatus = (taskId) => {
+            checkZipStatusApi(taskId)
+                  .then((response) => {
+                        if(response?.data){
+                          setProgress(prevProgress => prevProgress + 5);
+                          const binaryBytes = response.data;
+                          navigate('/downloader', {state: {data: binaryData }});
+                }
+                else{
+                  setTimeout(checkZipStatus(taskId), 10000);
+                }
+              });
+          
+
           const checkStatus =(taskId) => {
               checkTaskStatusApi(taskId)
                   .then((response) => {
@@ -149,29 +163,43 @@ const Dash = () => {
                         if(response?.data?.data){
                           setProgress(prevProgress => prevProgress + 60);
                           const splitVideoUrls = response.data.data;
+                          generateZip(splitVideoUrls)
+                          .then((res) => {
+                            if (res?.data?.data){
+                              const taskId = res.data.data;
+                              setProgress(prevProgress => prevProgress + 20);
+                              checkZipStatus(taskId)
+                            }
+                            })
+                            .catch((err) => {
+                                showAlert('error', {
+                                    title: err.message   
+                                })
+                                setShowProgressBar(false);
+                            })
 
-                          axios({
-                            method: 'post',
-                            url: 'http://videoprocessingbackend.rootpointers.net/generatezip/',
-                            responseType: 'blob',
-                            data: {
-                              file_urls: splitVideoUrls
-                            },
-                        })
-                          .then((response) => {
-                            console.log('response of generate zip', response)
-                            setProgress(prevProgress => prevProgress + 10);
-                            const binaryData = response.data;
-                            console.log('binary data', binaryData)
-                            navigate('/downloader', {state: {data: binaryData }});
-                            setShowProgressBar(false);
+                        //   axios({
+                        //     method: 'post',
+                        //     url: 'http://videoprocessingbackend.rootpointers.net/generatezip/',
+                        //     responseType: 'blob',
+                        //     data: {
+                        //       file_urls: splitVideoUrls
+                        //     },
+                        // })
+                        //   .then((response.blob()) => {
+                        //     console.log('response of generate zip', response)
+                        //     setProgress(prevProgress => prevProgress + 10);
+                        //     const binaryData = response.data;
+                        //     console.log('binary data', binaryData)
+                        //     navigate('/downloader', {state: {data: binaryData }});
+                        //     setShowProgressBar(false);
 
-                          })
-                          .catch((err) => {
-                              showAlert('error', {
-                                title: err.message
-                              });
-                            });
+                        //   })
+                        //   .catch((err) => {
+                        //       showAlert('error', {
+                        //         title: err.message
+                        //       });
+                        //     });
                       
                         
                         
@@ -226,7 +254,7 @@ const Dash = () => {
         })
        }
     }
-    
+  }
 
 
     return (
