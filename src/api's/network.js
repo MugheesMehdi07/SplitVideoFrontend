@@ -11,7 +11,7 @@ export function ProcesVideos(params) {
     //   headers,
     //   responseType: 'blob',
     // };
-    return axios.post(Dev_Url + "generatevariations/", params, {headers});
+    return axios.post(prod_url + "generatevariations/", params, {headers});
 }
 
 export function checkTaskStatusApi(taskId) {
@@ -24,7 +24,7 @@ export function checkTaskStatusApi(taskId) {
   };
  
   console.log('in checkTaskStatusApi')
-  return axios.post(Dev_Url + "checkstatus/", params, {headers});
+  return axios.post(prod_url + "checkstatus/", params, {headers});
 }
 
 export function generateZip(fileurls) {
@@ -41,5 +41,5 @@ export function generateZip(fileurls) {
     };
  
   console.log('in generate zip api')
-  return axios.post(Dev_Url + "generatezip/", params, config);
+  return axios.post(prod_url + "generatezip/", params, config);
 }
