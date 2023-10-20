@@ -6,6 +6,7 @@ import './dashboard.css';
 import {ProcesVideos, UploadMainVideo, UploadOverlayVideo} from "../api's/network.js";
 import useSweetAlert from "../alerts/useSweetAlert.jsx";
 import ProgressBar from 'react-bootstrap/ProgressBar';
+import AWS from 'aws-sdk';
 
 
 
@@ -24,104 +25,115 @@ const Dash = () => {
     const [showOverlayFileUploadedText, setShowOverlayFileUploadedText] = useState(false);
     const [progress, setProgress] = useState(0);
     const [showProgressBar, setShowProgressBar] = useState(false); // Flag to show/hide the progress bar
+    
 
-
-    useEffect(() => {
-        
-
-    }, [])
-  
-      
-
-    const handleMainFileInputChange = (e) => {
-        const selectedFile = e.target.files[0];
-        if (selectedFile && selectedFile.type.startsWith('video/')) {
-            const formData = new FormData();
-            setMainFileUploading('uploading....')
-            setShowFileUploadedText(true);
-            formData.append('mainVideo', selectedFile);
-            setShowProgressBar(true);
-
-            setTimeout(() => {
-                setProgress(prevProgress => prevProgress + 5);   
-                        }, 10000);
-
-            UploadMainVideo(formData)
-            .then((res) =>{
-                if (res.data.success === true){
-                    setMainFileUploading('file successfully uploaded')
-                    if (res.data.data) {
-                        setMainVideo(res.data.data);
-                        setProgress(prevProgress => prevProgress + 20);
-                        setTimeout(() => {
-                            setShowFileUploadedText(false);
-                            setMainFileUploading('')
-                        }, 5000);
-                    }
-                }
-            })
-            .catch((err) => {
-                setMainFileUploading('')
-                e.target.value = '';
-                showAlert('error', {
-                    title: err.message
-                })
-            })
-            setMainFileName(selectedFile.name)
-      }
-      else{
-        showAlert('error', {
-            title: 'Please upload a video file'
-        }) 
-        e.target.value = '';
-        
+    const config = {
+        bucketName: 'esr-media',
+        region: 'us-east-2',
+        accessKeyId: 'AKIAZDPYVJHPXWJCBY7J',
+        secretAccessKey: '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',
     }
-};
 
-    const handleOverlayFileInputChange = (e) => {
+    const uploadFile = async (key, file, config) => {
+        return new Promise((resolve, reject) => {
+          const s3 = new AWS.S3(config);
+          const params = {
+            Bucket: 'esr-media',
+            Key: key,
+            Body: file, // This is the file data
+            ACL: 'public-read',
+          };
+          s3.upload(params, (err, data) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(data);
+            }
+          });
+        });
+      };
+
+      const generateUniqueFileName = (file) => {
+        const currentDateTime = new Date().toISOString().replace(/[-:.T]/g, '');
+        const fileExtension = file.name.split('.').pop(); 
+        const uniqueFileName = `${currentDateTime}.${fileExtension}`;
+        return uniqueFileName;
+      };
+      
+    const handleMainFileInputChange = async (e) => {
+        console.log('in main handle')
         const selectedFile = e.target.files[0];
+      
         if (selectedFile && selectedFile.type.startsWith('video/')) {
-            const formData = new FormData();
-            setOverlayFileUploading('uploading....')
-            setShowOverlayFileUploadedText(true);
-            formData.append('overlayVideo', selectedFile);
-            setShowProgressBar(true);
-            UploadOverlayVideo(formData)
-            .then((res) =>{
-                if (res.data.success === true){
-                    setOverlayFileUploading('File successfully uploaded')
-                    if (res.data.data) {
-                        setOverlayVideo(res.data.data);
-                        setProgress(prevProgress => prevProgress + 25);
-                        setTimeout(() => {
-                            setShowOverlayFileUploadedText(false);
-                            setOverlayFileUploading('');
-                            
-                        }, 10000);
-                    }
-                }
-            })
-            .catch((err) => {
-                setOverlayFileUploading('')
-                e.target.value = '';
-                showAlert('error', {
-                    title: err.message
-                })
-            })
-            setOverlayFileName(selectedFile.name)
-        }
-        else{
+          setMainFileUploading('Uploading...');
+          setShowFileUploadedText(true)
+          try {
+            const filename = generateUniqueFileName(selectedFile)
+            const key = `main/${filename}`;
+            const data = await uploadFile(key, selectedFile, config);
+            console.log('File uploaded:', data);
+            setMainFileUploading('File successfully uploaded');
+      
+            setTimeout(() => {
+              setShowFileUploadedText(false);
+              setMainFileUploading('');
+            }, 5000);
+            const s3FileUrl = data.Location;
+            console.log('File URL:', s3FileUrl);
+            setMainVideo(s3FileUrl)
+          } catch (err) {
+            console.error('Error uploading file:', err);
             showAlert('error', {
-                title: 'Please upload a video file'
-            }) 
+              title: err.name,
+            });
             e.target.value = '';
+            setShowFileUploadedText(false);
+            setMainFileUploading('');
+          }
         }
-    };
+      };
+
+    const handleOverlayFileInputChange = async (e) => {
+        console.log('in overlay handle');
+        const selectedFile = e.target.files[0];
+        console.log('selected file', selectedFile);
+    
+        if (selectedFile && selectedFile.type.startsWith('video/')) {
+            setShowOverlayFileUploadedText(true);
+            setOverlayFileUploading('Uploading...');
+            try {
+                const filenm = generateUniqueFileName(selectedFile);
+                const key = `overlay/${filenm}`;
+                const data = await uploadFile(key, selectedFile, config);
+                console.log('overlay File uploaded:', data);
+                setOverlayFileUploading('File successfully uploaded');
+          
+                setTimeout(() => {
+                  setShowFileUploadedText(false);
+                  setOverlayFileUploading('');
+                }, 5000);
+                const s3FileUrl = data.Location;
+                console.log('File URL:', s3FileUrl);
+                setOverlayVideo(s3FileUrl)
+              } catch (err) {
+                console.error('Error uploading file:', err);
+                showAlert('error', {
+                  title: err.name,
+                });
+                e.target.value = '';
+                setShowOverlayFileUploadedText(false);
+                setOverlayFileUploading('');
+              }
+            }
+          };
+
 
     const handleSubmit = (e) =>{
         e.preventDefault();
         if (mainVideo && overlayVideo && variations){
             console.log('in submit handle')
+            console.log('main video in submit handle', mainVideo)
+            console.log('overlay vidoe in submit handle', overlayVideo)
             const formData = new FormData();
             formData.append('mainVideo', mainVideo);
             formData.append('overlayVideo', overlayVideo);

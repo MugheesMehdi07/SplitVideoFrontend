@@ -2,11 +2,14 @@ import logo from './logo.svg';
 import './App.css';
 import Dash from './components/dashbord';
 import Downloader from './components/downloader';
+import { Buffer } from "buffer/";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
 } from "react-router-dom";
+
+window.Buffer = Buffer;
 
 function App() {
   return (
