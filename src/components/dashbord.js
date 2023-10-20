@@ -175,10 +175,11 @@ const Dash = () => {
                       
                         
                         
-                      } else {
-                        setTimeout(checkStatus(taskId), 10000);
-                           } 
+                      }  
                       }
+                      else {
+                        setTimeout(checkStatus(taskId), 10000);
+                           }
                   })
                 
           };
@@ -200,7 +201,9 @@ const Dash = () => {
             formData.append('variations', variations);
             formData.append('style', style);
             setShowProgressBar(true)
-            setProgress(prevProgress => prevProgress + 10);
+            setTimeout(() => {
+              setProgress(prevProgress => prevProgress + 10);
+            }, 10000);
             ProcesVideos(formData)
             
             .then((res) => {
