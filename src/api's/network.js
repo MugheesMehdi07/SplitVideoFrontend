@@ -33,7 +33,7 @@ export function generateZip(fileurls) {
   }
 
   const headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/zip',
   };
   const config = {
       headers,

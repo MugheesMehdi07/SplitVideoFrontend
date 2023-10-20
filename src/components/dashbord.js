@@ -151,8 +151,10 @@ const Dash = () => {
 
                           generateZip(splitVideoUrls)
                           .then((response) => {
+                            console.log('response of generate zip', response)
                             setProgress(prevProgress => prevProgress + 10);
                             const binaryData = response.data;
+                            console.log('binary data', binaryData)
                             navigate('/downloader', {state: {data: binaryData }});
                             setShowProgressBar(false);
 
