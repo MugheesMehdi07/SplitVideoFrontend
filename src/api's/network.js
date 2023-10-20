@@ -33,13 +33,13 @@ export function generateZip(fileurls) {
   }
 
   const headers = {
-    'Accept': 'application/octet-stream',
+    'Content-Type': 'application/json',
   };
-  const config = {
-      headers,
-      responseType: 'blob',
-    };
+  // const config = {
+  //     headers,
+  //     responseType: 'blob',
+  //   };
  
   console.log('in generate zip api')
-  return axios.post(prod_url + "generatezip/", params, config);
+  return axios.post(prod_url + "generatezip/", params, {headers});
 }
