@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate, useHistory } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './dashboard.css';
-import {ProcesVideos, UploadMainVideo, UploadOverlayVideo} from "../api's/network.js";
+import {ProcesVideos, UploadMainVideo, UploadOverlayVideo, checkTaskStatusApi, generateZip} from "../api's/network.js";
 import useSweetAlert from "../alerts/useSweetAlert.jsx";
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import AWS from 'aws-sdk';
@@ -24,7 +24,7 @@ const Dash = () => {
     const [showFileUploadedText, setShowFileUploadedText] = useState(false);
     const [showOverlayFileUploadedText, setShowOverlayFileUploadedText] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [showProgressBar, setShowProgressBar] = useState(false); // Flag to show/hide the progress bar
+    const [showProgressBar, setShowProgressBar] = useState(false);
     
 
     const config = {
@@ -40,7 +40,7 @@ const Dash = () => {
           const params = {
             Bucket: 'esr-media',
             Key: key,
-            Body: file, // This is the file data
+            Body: file, 
             ACL: 'public-read',
           };
           s3.upload(params, (err, data) => {
@@ -71,16 +71,16 @@ const Dash = () => {
             const filename = generateUniqueFileName(selectedFile)
             const key = `main/${filename}`;
             const data = await uploadFile(key, selectedFile, config);
-            console.log('File uploaded:', data);
             setMainFileUploading('File successfully uploaded');
       
             setTimeout(() => {
               setShowFileUploadedText(false);
               setMainFileUploading('');
             }, 5000);
+            if (data?.Location){
             const s3FileUrl = data.Location;
-            console.log('File URL:', s3FileUrl);
             setMainVideo(s3FileUrl)
+          }
           } catch (err) {
             console.error('Error uploading file:', err);
             showAlert('error', {
@@ -91,7 +91,14 @@ const Dash = () => {
             setMainFileUploading('');
           }
         }
+        else{
+          showAlert('error', {
+            title: 'Please upload video file',
+          });
+          e.target.value = '';
+        }
       };
+
 
     const handleOverlayFileInputChange = async (e) => {
         console.log('in overlay handle');
@@ -112,11 +119,12 @@ const Dash = () => {
                   setShowFileUploadedText(false);
                   setOverlayFileUploading('');
                 }, 5000);
+                if (data?.Location){
                 const s3FileUrl = data.Location;
                 console.log('File URL:', s3FileUrl);
                 setOverlayVideo(s3FileUrl)
+              }
               } catch (err) {
-                console.error('Error uploading file:', err);
                 showAlert('error', {
                   title: err.name,
                 });
@@ -125,32 +133,71 @@ const Dash = () => {
                 setOverlayFileUploading('');
               }
             }
+            else{
+              showAlert('error', {
+                title: 'Please upload video file',
+              });
+              e.target.value = '';
+            }
           };
+
+          const checkStatus =(taskId) => {
+              checkTaskStatusApi(taskId)
+                  .then((response) => {
+                      if (response.data.success === true) {
+                        if(response?.data?.data){
+                          setProgress(prevProgress => prevProgress + 60);
+                          const splitVideoUrls = response.data.data;
+
+                          generateZip(splitVideoUrls)
+                          .then((response) => {
+                            setProgress(prevProgress => prevProgress + 10);
+                            const binaryData = response.data;
+                            navigate('/downloader', {state: {data: binaryData }});
+                            setShowProgressBar(false);
+
+                          })
+                          .catch((err) => {
+                              showAlert('error', {
+                                title: err.message
+                              });
+                            });
+                        }
+                      } else {
+                          setTimeout(checkStatus(taskId), 10000);
+                      }
+                  })
+                
+          };
+        
+        
+    
+  
+          
+    
 
 
     const handleSubmit = (e) =>{
-        e.preventDefault();
+        
         if (mainVideo && overlayVideo && variations){
-            console.log('in submit handle')
-            console.log('main video in submit handle', mainVideo)
-            console.log('overlay vidoe in submit handle', overlayVideo)
+          e.preventDefault();
             const formData = new FormData();
             formData.append('mainVideo', mainVideo);
             formData.append('overlayVideo', overlayVideo);
             formData.append('variations', variations);
             formData.append('style', style);
-            
+            setShowProgressBar(true)
             setProgress(prevProgress => prevProgress + 10);
             ProcesVideos(formData)
             
             .then((res) => {
-                const binaryData = res.data;
-                setProgress(prevProgress => prevProgress + 40);
-                navigate('/downloader', {state: {data: binaryData }}); 
-                setShowProgressBar(false);    
+              if (res?.data?.data){
+                const taskId = res.data.data;
+                setProgress(prevProgress => prevProgress + 20);
+                checkStatus(taskId)
+              }
             })
             .catch((err) => {
-                console.log('error in generate variation', err)
                 showAlert('error', {
                     title: err.message   
                 })
