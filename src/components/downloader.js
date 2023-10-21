@@ -24,39 +24,47 @@ const Downloader = () => {
     }, [res])
 
    
-    function downloadFile(filesData, zipFileName) {
+    function downloadFile(zipFileBytes, name) {
+        const blob = new Blob([zipFileBytes], { type: 'application/octet-stream' });
+      
         const zip = new JSZip();
+        zip.loadAsync(blob)
+          .then((zip) => {
+            const flattenedFiles = {};
       
-        // Add files with their original filenames
-        filesData.forEach((fileData, filename) => {
-          zip.file(filename, fileData);
-        });
+            zip.forEach((relativePath, file) => {
+              // Remove any folder structure, keeping only the file name
+              const parts = relativePath.split('/');
+              const fileName = parts[parts.length - 1];
+              flattenedFiles[fileName] = file;
+            });
       
-        // Generate the zip file
-        zip.generateAsync({ type: 'blob', compression: 'DEFLATE' })
-          .then((blob) => {
-            // Create a download link for the zip file
-            const url = window.URL.createObjectURL(blob);
+            return flattenedFiles;
+          })
+          .then((flattenedFiles) => {
+            const zip = new JSZip();
+            Object.keys(flattenedFiles).forEach((fileName) => {
+              zip.file(fileName, flattenedFiles[fileName].async('arraybuffer'));
+            });
+      
+            return zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+          })
+          .then((flattenedZipBlob) => {
+            // Here you can do something with the flattened ZIP blob
+            // For example, you can initiate a download
             const a = document.createElement('a');
-            a.href = url;
-            a.download = zipFileName;
-            a.style.display = 'none';
-      
-            // Trigger the download
             document.body.appendChild(a);
+            a.style = 'display: none';
+            const url = window.URL.createObjectURL(flattenedZipBlob);
+            a.href = url;
+            a.download = name;
             a.click();
-      
-            // Clean up
             window.URL.revokeObjectURL(url);
             setTimeout(() => {
                 navigate('/'); 
             }, 10000);
-          })
-          .catch((error) => {
-            console.error('Error creating zip file:', error);
           });
       }
-      
       
       
           
