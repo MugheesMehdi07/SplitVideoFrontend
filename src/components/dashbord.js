@@ -8,7 +8,7 @@ import useSweetAlert from "../alerts/useSweetAlert.jsx";
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import AWS from 'aws-sdk';
 import axios from "axios";
-
+import JSZip from 'jszip';
 
 
 const Dash = () => {
@@ -142,19 +142,40 @@ const Dash = () => {
             }
           };
 
-          const checkZipStatus = (taskId) => {
-            checkZipStatusApi(taskId)
-                  .then((response) => {
-                        if(response?.data){
-                          setProgress(prevProgress => prevProgress + 5);
-                          const binaryBytes = response.data;
-                          navigate('/downloader', {state: {data: binaryData }});
-                }
-                else{
-                  setTimeout(checkZipStatus(taskId), 10000);
-                }
-              });
+          // const checkZipStatus = (taskId) => {
+          //   checkZipStatusApi(taskId)
+          //         .then((response) => {
+          //               if(response?.data){
+          //                 setProgress(prevProgress => prevProgress + 5);
+          //                 const binaryBytes = response.data;
+          //                 navigate('/downloader', {state: {data: binaryData }});
+          //       }
+          //       else{
+          //         setTimeout(checkZipStatus(taskId), 10000);
+          //       }
+          //     });
+          async function generateZipData(fileUrls) {
+            console.log('in generate zip data function')
+            const zip = new JSZip();
+            const folder = zip.folder('my-zip-folder');
           
+            // Download and add each file to the zip
+            for (let i = 0; i < fileUrls.length; i++) {
+              const response = await fetch(fileUrls[i]);
+              if (response.ok) {
+                const fileData = await response.blob();
+                folder.file(`file_${i}.mp4`, fileData);
+                console.log('file is downloaded and added to zip')
+              } else {
+                console.error(`Failed to download file at URL: ${fileUrls[i]}`);
+              }
+            }
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            console.log('zip blob', zipBlob)
+            return zipBlob;
+          }
+
+
 
           const checkStatus =(taskId) => {
               checkTaskStatusApi(taskId)
@@ -163,20 +184,26 @@ const Dash = () => {
                         if(response?.data?.data){
                           setProgress(prevProgress => prevProgress + 60);
                           const splitVideoUrls = response.data.data;
-                          generateZip(splitVideoUrls)
-                          .then((res) => {
-                            if (res?.data?.data){
-                              const taskId = res.data.data;
-                              setProgress(prevProgress => prevProgress + 20);
-                              checkZipStatus(taskId)
-                            }
-                            })
-                            .catch((err) => {
-                                showAlert('error', {
-                                    title: err.message   
-                                })
-                                setShowProgressBar(false);
-                            })
+                          if (splitVideoUrls) {
+                            generateZipData(splitVideoUrls).then((zipBlob) => {
+                              navigate('/downloader', { state: { zipData: zipBlob } });
+                            });
+                          }
+
+                          // generateZip(splitVideoUrls)
+                          // .then((res) => {
+                          //   if (res?.data?.data){
+                          //     const taskId = res.data.data;
+                          //     setProgress(prevProgress => prevProgress + 10);
+                          //     checkZipStatus(taskId)
+                          //   }
+                          //   })
+                          //   .catch((err) => {
+                          //       showAlert('error', {
+                          //           title: err.message   
+                          //       })
+                          //       setShowProgressBar(false);
+                          //   })
 
                         //   axios({
                         //     method: 'post',
@@ -254,7 +281,7 @@ const Dash = () => {
         })
        }
     }
-  }
+  
 
 
     return (

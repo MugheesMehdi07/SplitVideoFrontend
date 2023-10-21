@@ -16,53 +16,103 @@ const Downloader = () => {
     const showAlert = useSweetAlert();
     const location = useLocation();
     const [zipFile, setZipFile] = useState('')
-    const res = location?.state?.data;
+    const res = location?.state?.zipData;
     const filename = 'split_videos.zip';
     const navigate = useNavigate();
     useEffect(() => {
         setZipFile(res)
     }, [res])
 
-    function downloadFile(zipFileBytes, name) {  
-        const binaryData = zipFileBytes;  
+    // function downloadFile(zipFileBytes, name) {  
+    //     const binaryData = zipFileBytes;
+
+    //     const zip = new JSZip();
+    //     zip.loadAsync(binaryData)
+    //     .then((zip) => {
+    //         const fileNames = Object.keys(zip.files);
+    //         console.log('filenames', fileNames)
+    //         fileNames.forEach((fileName) => {
+    //         zip.files[fileName].async("arraybuffer").then((fileData) => {
+    //         zip.file(fileName, fileData);
+    //         });
+    //         });
+
+    //         // Generate a new zip file containing the extracted data
+    //         return zip.generateAsync({ type: "blob", compression: 'DEFLATE' });
+    //     })
+    //     .then((blob) => {
+    //         // SVGAnimatedPreserveAspectRatio(blob, "SplitVideos.zip")
+    //         const url = window.URL.createObjectURL(blob);
+    //         const a = document.createElement("a");
+    //         a.href = url;
+    //         a.download = "SplitVideos.zip";
+    //         a.style.display = "none";
+
+    //         // Trigger the download
+    //         document.body.appendChild(a);
+    //         a.click();
+
+    //         // Clean up
+    //         window.URL.revokeObjectURL(url);
+    //         setTimeout(() => {
+    //             navigate('/'); 
+    //         }, 10000); // 10 seconds in milliseconds
+        
+    //     })
+    //     .catch((error) => {
+    //         console.error("Error loading and extracting zip file:", error);
+    //     });
+
+    //     }
+    function downloadFile(zipFileBytes, name) {
+        const blob = new Blob([zipFileBytes], { type: 'application/octet-stream' });
+      
         const zip = new JSZip();
-        zip.loadAsync(binaryData)
-        .then((zip) => {
-            const fileNames = Object.keys(zip.files);
-            console.log('filenames', fileNames)
-            fileNames.forEach((fileName) => {
-            zip.files[fileName].async("arraybuffer").then((fileData) => {
-            zip.file(fileName, fileData);
+        zip.loadAsync(blob)
+          .then((zip) => {
+            const files = {};
+            zip.forEach((relativePath, file) => {
+              files[relativePath] = file;
             });
+      
+            return files;
+          })
+          .then((files) => {
+            const zip = new JSZip();
+            Object.keys(files).forEach((relativePath) => {
+              zip.file(relativePath, files[relativePath].async('arraybuffer'));
             });
-
-            // Generate a new zip file containing the extracted data
-            return zip.generateAsync({ type: "blob", compression: 'DEFLATE' });
-        })
-        .then((blob) => {
-            // SVGAnimatedPreserveAspectRatio(blob, "SplitVideos.zip")
+      
+            return zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+          })
+          .then((blob) => {
             const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
+            const a = document.createElement('a');
             a.href = url;
-            a.download = "SplitVideos.zip";
-            a.style.display = "none";
-
+            a.download = name;
+            a.style.display = 'none';
+      
             // Trigger the download
             document.body.appendChild(a);
             a.click();
-
+      
             // Clean up
             window.URL.revokeObjectURL(url);
             setTimeout(() => {
-                navigate('/'); 
-            }, 10000); // 10 seconds in milliseconds
-        
-        })
-        .catch((error) => {
-            console.error("Error loading and extracting zip file:", error);
-        });
-
-        }
+                    navigate('/'); 
+                }, 10000);
+          })
+          .catch((error) => {
+            console.error('Error loading and extracting zip file:', error);
+          });
+      }
+      
+          
+          
+          
+          
+          
+          
         
 
    
