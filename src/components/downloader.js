@@ -23,73 +23,23 @@ const Downloader = () => {
         setZipFile(res)
     }, [res])
 
-    // function downloadFile(zipFileBytes, name) {  
-    //     const binaryData = zipFileBytes;
-
-    //     const zip = new JSZip();
-    //     zip.loadAsync(binaryData)
-    //     .then((zip) => {
-    //         const fileNames = Object.keys(zip.files);
-    //         console.log('filenames', fileNames)
-    //         fileNames.forEach((fileName) => {
-    //         zip.files[fileName].async("arraybuffer").then((fileData) => {
-    //         zip.file(fileName, fileData);
-    //         });
-    //         });
-
-    //         // Generate a new zip file containing the extracted data
-    //         return zip.generateAsync({ type: "blob", compression: 'DEFLATE' });
-    //     })
-    //     .then((blob) => {
-    //         // SVGAnimatedPreserveAspectRatio(blob, "SplitVideos.zip")
-    //         const url = window.URL.createObjectURL(blob);
-    //         const a = document.createElement("a");
-    //         a.href = url;
-    //         a.download = "SplitVideos.zip";
-    //         a.style.display = "none";
-
-    //         // Trigger the download
-    //         document.body.appendChild(a);
-    //         a.click();
-
-    //         // Clean up
-    //         window.URL.revokeObjectURL(url);
-    //         setTimeout(() => {
-    //             navigate('/'); 
-    //         }, 10000); // 10 seconds in milliseconds
-        
-    //     })
-    //     .catch((error) => {
-    //         console.error("Error loading and extracting zip file:", error);
-    //     });
-
-    //     }
-    function downloadFile(zipFileBytes, name) {
-        const blob = new Blob([zipFileBytes], { type: 'application/octet-stream' });
-      
+   
+    function downloadFile(filesData, zipFileName) {
         const zip = new JSZip();
-        zip.loadAsync(blob)
-          .then((zip) => {
-            const files = {};
-            zip.forEach((relativePath, file) => {
-              files[relativePath] = file;
-            });
       
-            return files;
-          })
-          .then((files) => {
-            const zip = new JSZip();
-            Object.keys(files).forEach((relativePath) => {
-              zip.file(relativePath, files[relativePath].async('arraybuffer'));
-            });
+        // Add files with their original filenames
+        filesData.forEach((fileData, filename) => {
+          zip.file(filename, fileData);
+        });
       
-            return zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-          })
+        // Generate the zip file
+        zip.generateAsync({ type: 'blob', compression: 'DEFLATE' })
           .then((blob) => {
+            // Create a download link for the zip file
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = name;
+            a.download = zipFileName;
             a.style.display = 'none';
       
             // Trigger the download
@@ -99,13 +49,15 @@ const Downloader = () => {
             // Clean up
             window.URL.revokeObjectURL(url);
             setTimeout(() => {
-                    navigate('/'); 
-                }, 10000);
+                navigate('/'); 
+            }, 10000);
           })
           .catch((error) => {
-            console.error('Error loading and extracting zip file:', error);
+            console.error('Error creating zip file:', error);
           });
       }
+      
+      
       
           
           
