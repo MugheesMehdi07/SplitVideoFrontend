@@ -26,70 +26,78 @@ const Dash = () => {
     const [showOverlayFileUploadedText, setShowOverlayFileUploadedText] = useState(false);
     const [progress, setProgress] = useState(0);
     const [showProgressBar, setShowProgressBar] = useState(false);
-    
+    const [mainUploadProgress, setMainUploadProgress] = useState(0);
+    const [overlayUploadProgress, setOverlayUploadProgress] = useState(0);
+    const tolerance = 0.01;
 
-    const config = {
-        bucketName: 'esr-media',
-        region: 'us-east-2',
-        accessKeyId: 'AKIAZDPYVJHPXWJCBY7J',
-        secretAccessKey: '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',
-    }
-
-    const uploadFile = async (key, file, config) => {
-        return new Promise((resolve, reject) => {
-          const s3 = new AWS.S3(config);
-          const params = {
-            Bucket: 'esr-media',
+    AWS.config.update({
+      bucketName: 'esr-media',
+      accessKeyId: 'AKIAZDPYVJHPXWJCBY7J',
+      secretAccessKey: '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',
+      region: 'us-east-2',
+      });
+  
+    const s3 = new AWS.S3();
+    const uploadFile = async (key, file) => {
+        const params = {
+            Bucket:'esr-media',
             Key: key,
-            Body: file, 
+            Body: file,
             ACL: 'public-read',
-          };
-          s3.upload(params, (err, data) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(data);
-            }
-          });
-        });
-      };
+        };
 
-      const generateUniqueFileName = (file) => {
-        const currentDateTime = new Date().toISOString().replace(/[-:.T]/g, '');
-        const fileExtension = file.name.split('.').pop(); 
-        const uniqueFileName = `${currentDateTime}.${fileExtension}`;
-        return uniqueFileName;
-      };
+        return new Promise((resolve, reject) => {
+            const request = s3.upload(params);
+
+            request.on('httpUploadProgress', (progress) => {
+                const loaded = progress.loaded;
+                const total = progress.total;
+                const percentage = Math.round((loaded / total) * 100);
+                console.log('percentage', percentage)
+                if (key.includes('main')){
+                setMainUploadProgress(percentage);
+                } else{
+                setOverlayUploadProgress(percentage);
+
+                }
+            });
+
+            request.send((err, data) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+        });
+    };
+
+    const generateUniqueFileName = (file) => {
+      const currentDateTime = new Date().toISOString().replace(/[-:.T]/g, '');
+      const fileExtension = file.name.split('.').pop(); 
+      const uniqueFileName = `${currentDateTime}.${fileExtension}`;
+      return uniqueFileName;
+    };
       
     const handleMainFileInputChange = async (e) => {
-        console.log('in main handle')
         const selectedFile = e.target.files[0];
       
         if (selectedFile && selectedFile.type.startsWith('video/')) {
-          setMainFileUploading('Uploading...');
-          setShowFileUploadedText(true)
           try {
             const filename = generateUniqueFileName(selectedFile)
             const key = `main/${filename}`;
-            const data = await uploadFile(key, selectedFile, config);
-            setMainFileUploading('File successfully uploaded');
-      
-            setTimeout(() => {
-              setShowFileUploadedText(false);
-              setMainFileUploading('');
-            }, 5000);
+            const data = await  uploadFile(key, selectedFile);
             if (data?.Location){
             const s3FileUrl = data.Location;
+            console.log('s3 file url', s3FileUrl)
             setMainVideo(s3FileUrl)
-          }
+            }
           } catch (err) {
             console.error('Error uploading file:', err);
             showAlert('error', {
               title: err.name,
             });
             e.target.value = '';
-            setShowFileUploadedText(false);
-            setMainFileUploading('');
           }
         }
         else{
@@ -107,31 +115,21 @@ const Dash = () => {
         console.log('selected file', selectedFile);
     
         if (selectedFile && selectedFile.type.startsWith('video/')) {
-            setShowOverlayFileUploadedText(true);
-            setOverlayFileUploading('Uploading...');
             try {
                 const filenm = generateUniqueFileName(selectedFile);
                 const key = `overlay/${filenm}`;
-                const data = await uploadFile(key, selectedFile, config);
+                const data = await  uploadFile(key, selectedFile);
                 console.log('overlay File uploaded:', data);
-                setOverlayFileUploading('File successfully uploaded');
-          
-                setTimeout(() => {
-                  setShowFileUploadedText(false);
-                  setOverlayFileUploading('');
-                }, 5000);
                 if (data?.Location){
                 const s3FileUrl = data.Location;
                 console.log('File URL:', s3FileUrl);
                 setOverlayVideo(s3FileUrl)
-              }
+                }
               } catch (err) {
                 showAlert('error', {
                   title: err.name,
                 });
                 e.target.value = '';
-                setShowOverlayFileUploadedText(false);
-                setOverlayFileUploading('');
               }
             }
             else{
@@ -141,39 +139,26 @@ const Dash = () => {
               e.target.value = '';
             }
           };
-
-          // const checkZipStatus = (taskId) => {
-          //   checkZipStatusApi(taskId)
-          //         .then((response) => {
-          //               if(response?.data){
-          //                 setProgress(prevProgress => prevProgress + 5);
-          //                 const binaryBytes = response.data;
-          //                 navigate('/downloader', {state: {data: binaryData }});
-          //       }
-          //       else{
-          //         setTimeout(checkZipStatus(taskId), 10000);
-          //       }
-          //     });
-          async function generateZipData(fileUrls) {
-            console.log('in generate zip data function')
-            const zip = new JSZip();
-            const folder = zip.folder('my-zip-folder');
-          
-            // Download and add each file to the zip
-            for (let i = 0; i < fileUrls.length; i++) {
-              const response = await fetch(fileUrls[i]);
-              if (response.ok) {
-                const fileData = await response.blob();
-                folder.file(`file_${i}.mp4`, fileData);
-                console.log('file is downloaded and added to zip')
-              } else {
-                console.error(`Failed to download file at URL: ${fileUrls[i]}`);
-              }
+        async function generateZipData(fileUrls) {
+          console.log('in generate zip data function')
+          const zip = new JSZip();
+          const folder = zip.folder('my-zip-folder');
+        
+          // Download and add each file to the zip
+          for (let i = 0; i < fileUrls.length; i++) {
+            const response = await fetch(fileUrls[i]);
+            if (response.ok) {
+              const fileData = await response.blob();
+              folder.file(`file_${i}.mp4`, fileData);
+              console.log('file is downloaded and added to zip')
+            } else {
+              console.error(`Failed to download file at URL: ${fileUrls[i]}`);
             }
-            const zipBlob = await zip.generateAsync({ type: 'blob' });
-            console.log('zip blob', zipBlob)
-            return zipBlob;
           }
+          const zipBlob = await zip.generateAsync({ type: 'blob' });
+          console.log('zip blob', zipBlob)
+          return zipBlob;
+        }
 
 
 
@@ -189,45 +174,6 @@ const Dash = () => {
                               navigate('/downloader', { state: { zipData: zipBlob } });
                             });
                           }
-
-                          // generateZip(splitVideoUrls)
-                          // .then((res) => {
-                          //   if (res?.data?.data){
-                          //     const taskId = res.data.data;
-                          //     setProgress(prevProgress => prevProgress + 10);
-                          //     checkZipStatus(taskId)
-                          //   }
-                          //   })
-                          //   .catch((err) => {
-                          //       showAlert('error', {
-                          //           title: err.message   
-                          //       })
-                          //       setShowProgressBar(false);
-                          //   })
-
-                        //   axios({
-                        //     method: 'post',
-                        //     url: 'http://videoprocessingbackend.rootpointers.net/generatezip/',
-                        //     responseType: 'blob',
-                        //     data: {
-                        //       file_urls: splitVideoUrls
-                        //     },
-                        // })
-                        //   .then((response.blob()) => {
-                        //     console.log('response of generate zip', response)
-                        //     setProgress(prevProgress => prevProgress + 10);
-                        //     const binaryData = response.data;
-                        //     console.log('binary data', binaryData)
-                        //     navigate('/downloader', {state: {data: binaryData }});
-                        //     setShowProgressBar(false);
-
-                        //   })
-                        //   .catch((err) => {
-                        //       showAlert('error', {
-                        //         title: err.message
-                        //       });
-                        //     });
-                      
                         
                         
                       }  
@@ -293,8 +239,8 @@ const Dash = () => {
             
             <form className='m-5'>
             <div style={{textAlign: 'center', color: '#0A2F73'}}><label><b>Upload main video (Short):<span style={{color:'red'}}></span></b></label></div>
-            <div className= 'row' style={{marginLeft:'70px'}}>
-                <div className="col-10 ">
+            <div className= 'row' style={{marginLeft:'100px'}}>
+                <div className="col-9 ">
                     <div className="form-group" style={{ position: 'relative' }}>
                         <input
                             type="file"
@@ -307,16 +253,17 @@ const Dash = () => {
                         </label>
                     </div>
                 </div>
-                <div className="col-2 ">
-                    {showFileUploadedText  && (
-                        <div className='helping-text'  style={{ whiteSpace: 'nowrap' }}><p>{mainFileUploading}</p></div>
-                    )}
+                <div className="col-3 ">
+                {mainUploadProgress > 0 && mainUploadProgress < 100 - tolerance && (
+                <ProgressBar now={parseInt(mainUploadProgress)} label={`${parseInt(mainUploadProgress)}%`} variant = "success" animated />
+            )}
+                    
                 </div>
             </div> 
 
             <div  style={{textAlign: 'center', color: '#0A2F73', marginTop: '10px'}}><label><b>Upload overlay video (Long):</b></label></div>
-                <div className= 'row' style={{marginLeft:'70px'}}>
-                    <div className="col-10">
+                <div className= 'row' style={{marginLeft:'100px'}}>
+                    <div className="col-9">
                         <div className="form-group" style={{ position: 'relative' }}>
                             <input
                                 type="file"
@@ -330,10 +277,10 @@ const Dash = () => {
                             </label>
                         </div>
                     </div>
-                     <div className="col-2 ">
-                        {showOverlayFileUploadedText  && (
-                                <div className='helping-text' style={{ whiteSpace: 'nowrap' }}><p>{overlayFileUploading}</p></div>
-                            )}
+                     <div className="col-3">
+                     {overlayUploadProgress > 0 && overlayUploadProgress < 100 - tolerance && (
+                        <ProgressBar now={parseInt(overlayUploadProgress)} label={`${parseInt(overlayUploadProgress)}%`} variant = "success" animated />
+                    )}
                     </div>  
                 </div>
 
