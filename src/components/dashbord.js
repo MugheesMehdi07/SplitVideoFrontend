@@ -152,7 +152,9 @@ const Dash = () => {
           
           // Download and add each file to the zip
           for (let i = 0; i < fileUrls.length; i++) {
+            console.log('file urls', fileUrls)
             const response = await fetch(fileUrls[i]);
+            console.log('response', response)
             if (response.ok) {
               const fileData = await response.blob();
               folder.file(`file_${i}.mp4`, fileData);
