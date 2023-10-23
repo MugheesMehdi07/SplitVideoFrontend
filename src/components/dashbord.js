@@ -29,6 +29,10 @@ const Dash = () => {
     const [mainUploadProgress, setMainUploadProgress] = useState(0);
     const [overlayUploadProgress, setOverlayUploadProgress] = useState(0);
     const tolerance = 0.01;
+    const [zipGenerationStartTime, setZipGenerationStartTime] = useState(null);
+    const [zipGenerationEndTime, setZipGenerationEndTime] = useState(null);
+
+
 
     AWS.config.update({
       bucketName: 'esr-media',
@@ -139,11 +143,13 @@ const Dash = () => {
               e.target.value = '';
             }
           };
+
         async function generateZipData(fileUrls) {
-          console.log('in generate zip data function')
+          const zipGenerationStartTime = Date.now()/1000;
+          console.log('zip start time', zipGenerationStartTime)
           const zip = new JSZip();
           const folder = zip.folder('my-zip-folder');
-        
+          
           // Download and add each file to the zip
           for (let i = 0; i < fileUrls.length; i++) {
             const response = await fetch(fileUrls[i]);
@@ -157,6 +163,11 @@ const Dash = () => {
           }
           const zipBlob = await zip.generateAsync({ type: 'blob' });
           console.log('zip blob', zipBlob)
+          const zipGenerationEndTime = Date.now() / 1000;
+          console.log('zip end time', zipGenerationEndTime)
+
+          const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
+          console.log(`Zip generation took ${elapsedSeconds} seconds`);
           return zipBlob;
         }
 
@@ -256,8 +267,7 @@ const Dash = () => {
                 <div className="col-3 ">
                 {mainUploadProgress > 0 && mainUploadProgress < 100 - tolerance && (
                 <ProgressBar now={parseInt(mainUploadProgress)} label={`${parseInt(mainUploadProgress)}%`} variant = "success" animated />
-            )}
-                    
+            )}  
                 </div>
             </div> 
 

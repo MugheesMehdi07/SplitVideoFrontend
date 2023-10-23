@@ -1,5 +1,5 @@
 import axios from "axios";
-const Dev_Url = "http://127.0.0.1:8000/"
+const dev_Url = "http://127.0.0.1:8000/"
 const prod_url = "http://videoprocessingbackend.rootpointers.net/"
 
 export function ProcesVideos(params) {
