@@ -11,7 +11,7 @@ export function ProcesVideos(params) {
     //   headers,
     //   responseType: 'blob',
     // };
-    return axios.post(dev_Url + "generatevariations/", params, {headers});
+    return axios.post(prod_url + "generatevariations/", params, {headers});
 }
 
 export function checkTaskStatusApi(taskId) {
@@ -24,5 +24,5 @@ export function checkTaskStatusApi(taskId) {
   };
  
   console.log('in checkTaskStatusApi')
-  return axios.post(dev_Url + "checkstatus/", params, {headers});
+  return axios.post(prod_url + "checkstatus/", params, {headers});
 }
