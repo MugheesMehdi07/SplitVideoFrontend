@@ -17,34 +17,27 @@ const Dash = () => {
     const [variations, setVariations] = useState('');
     const [style, setStyle] = useState('');
     const showAlert = useSweetAlert();
-    const [mainFileName, setMainFileName] = useState('');
-    const [overlayFileName, setOverlayFileName] = useState('');
-    const [mainFileUploading, setMainFileUploading] = useState('');
-    const [overlayFileUploading, setOverlayFileUploading] = useState('');
     const navigate = useNavigate();
-    const [showFileUploadedText, setShowFileUploadedText] = useState(false);
-    const [showOverlayFileUploadedText, setShowOverlayFileUploadedText] = useState(false);
     const [progress, setProgress] = useState(0);
     const [showProgressBar, setShowProgressBar] = useState(false);
     const [mainUploadProgress, setMainUploadProgress] = useState(0);
     const [overlayUploadProgress, setOverlayUploadProgress] = useState(0);
     const tolerance = 0.01;
-    const [zipGenerationStartTime, setZipGenerationStartTime] = useState(null);
-    const [zipGenerationEndTime, setZipGenerationEndTime] = useState(null);
+
 
 
 
     AWS.config.update({
-      bucketName: 'esr-media',
-      accessKeyId: 'AKIAZDPYVJHPXWJCBY7J',
-      secretAccessKey: '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',
-      region: 'us-east-2',
+      bucketName: 'processed-videos-1',
+      accessKeyId: 'AKIA5IDIDMGRDADUBS5E',
+      secretAccessKey: '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',
+      region: 'us-east-1',
       });
   
     const s3 = new AWS.S3();
     const uploadFile = async (key, file) => {
         const params = {
-            Bucket:'esr-media',
+            Bucket:'processed-videos-1',
             Key: key,
             Body: file,
             ACL: 'public-read',
@@ -343,7 +336,7 @@ const Dash = () => {
                         <select className='form-select' onChange={(e) => setStyle(e.target.value)}>
                             <option value="" hidden></option>
                             <option value="overlay">Overlay</option>
-                            <option value="shrink">shrink</option>
+                            <option value="shrink">Shrink</option>
                         </select>    
                     </div>
                 </div>
