@@ -144,35 +144,52 @@ const Dash = () => {
             }
           };
 
-        async function generateZipData(fileUrls) {
+        // async function generateZipData(fileUrls) {
+        //   const zipGenerationStartTime = Date.now()/1000;
+        //   console.log('zip start time', zipGenerationStartTime)
+        //   const zip = new JSZip();
+        //   const folder = zip.folder('my-zip-folder');
+          
+        //   // Download and add each file to the zip
+        //   for (let i = 0; i < fileUrls.length; i++) {
+        //     console.log('file urls', fileUrls)
+        //     const response = await fetch(fileUrls[i]);
+        //     console.log('response', response)
+        //     if (response.ok) {
+        //       const fileData = await response.blob();
+        //       folder.file(`file_${i}.mp4`, fileData);
+        //       console.log('file is downloaded and added to zip')
+        //     } else {
+        //       console.error(`Failed to download file at URL: ${fileUrls[i]}`);
+        //     }
+        //   }
+        //   const zipBlob = await zip.generateAsync({ type: 'blob' });
+        //   console.log('zip blob', zipBlob)
+        //   const zipGenerationEndTime = Date.now() / 1000;
+        //   console.log('zip end time', zipGenerationEndTime)
+
+        //   const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
+        //   console.log(`Zip generation took ${elapsedSeconds} seconds`);
+        //   return zipBlob;
+        // }
+          
+        async function generateZipData(zipFileUrls) {
           const zipGenerationStartTime = Date.now()/1000;
           console.log('zip start time', zipGenerationStartTime)
-          const zip = new JSZip();
-          const folder = zip.folder('my-zip-folder');
-          
-          // Download and add each file to the zip
-          for (let i = 0; i < fileUrls.length; i++) {
-            console.log('file urls', fileUrls)
-            const response = await fetch(fileUrls[i]);
+            console.log('file urls', zipFileUrls)
+            const response = await fetch(zipFileUrls);
             console.log('response', response)
             if (response.ok) {
-              const fileData = await response.blob();
-              folder.file(`file_${i}.mp4`, fileData);
-              console.log('file is downloaded and added to zip')
+              const zipBlob = await response.blob();
+              const zipGenerationEndTime = Date.now() / 1000;
+              console.log('zip end time', zipGenerationEndTime);
+              const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
+              console.log(`Zip generation took ${elapsedSeconds} seconds`);
+              return zipBlob;
             } else {
-              console.error(`Failed to download file at URL: ${fileUrls[i]}`);
+              console.error(`Failed to download file`);
             }
-          }
-          const zipBlob = await zip.generateAsync({ type: 'blob' });
-          console.log('zip blob', zipBlob)
-          const zipGenerationEndTime = Date.now() / 1000;
-          console.log('zip end time', zipGenerationEndTime)
-
-          const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
-          console.log(`Zip generation took ${elapsedSeconds} seconds`);
-          return zipBlob;
         }
-
 
 
           const checkStatus =(taskId) => {

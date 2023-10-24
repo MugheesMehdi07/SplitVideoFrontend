@@ -26,29 +26,3 @@ export function checkTaskStatusApi(taskId) {
   console.log('in checkTaskStatusApi')
   return axios.post(prod_url + "checkstatus/", params, {headers});
 }
-
-// export function generateZip(fileurls) {
-//   const params = {
-//     'file_urls': fileurls
-//   }
-
-//   const headers = {
-//     'Content-Type': 'application/json',
-//   };
-
- 
-//   return axios.post(Dev_Url + "generatezip/", params, {headers});
-// }
-
-// export function checkZipStatusApi(taskId) {
-//   const params = {
-//     'task_id': taskId
-//   }
-
-//   const config = {
-//     responseType: 'blob', 
-//   };
-
- 
-//   return axios.post(Dev_Url + "checkzipstatus/", params, config);
-// }
