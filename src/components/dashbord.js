@@ -342,8 +342,8 @@ const Dash = () => {
                         <div><label style={{color: '#E3E8F2'}}>select style:</label></div>
                         <select className='form-select' onChange={(e) => setStyle(e.target.value)}>
                             <option value="" hidden></option>
-                            <option value="1">Overlay</option>
-                            <option value="2">Border</option>
+                            <option value="overlay">Overlay</option>
+                            <option value="shrink">shrink</option>
                         </select>    
                     </div>
                 </div>
