@@ -137,83 +137,67 @@ const Dash = () => {
             }
           };
 
-        // async function generateZipData(fileUrls) {
-        //   const zipGenerationStartTime = Date.now()/1000;
-        //   console.log('zip start time', zipGenerationStartTime)
-        //   const zip = new JSZip();
-        //   const folder = zip.folder('my-zip-folder');
           
-        //   // Download and add each file to the zip
-        //   for (let i = 0; i < fileUrls.length; i++) {
-        //     console.log('file urls', fileUrls)
-        //     const response = await fetch(fileUrls[i]);
-        //     console.log('response', response)
-        //     if (response.ok) {
-        //       const fileData = await response.blob();
-        //       folder.file(`file_${i}.mp4`, fileData);
-        //       console.log('file is downloaded and added to zip')
-        //     } else {
-        //       console.error(`Failed to download file at URL: ${fileUrls[i]}`);
-        //     }
-        //   }
-        //   const zipBlob = await zip.generateAsync({ type: 'blob' });
-        //   console.log('zip blob', zipBlob)
-        //   const zipGenerationEndTime = Date.now() / 1000;
-        //   console.log('zip end time', zipGenerationEndTime)
-
-        //   const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
-        //   console.log(`Zip generation took ${elapsedSeconds} seconds`);
-        //   return zipBlob;
-        // }
-          
-        async function generateZipData(zipFileUrls) {
-          const zipGenerationStartTime = Date.now()/1000;
-          console.log('zip start time', zipGenerationStartTime)
-            console.log('file urls', zipFileUrls)
-            const response = await fetch(zipFileUrls);
-            console.log('response', response)
-            if (response.ok) {
-              const zipBlob = await response.blob();
-              const zipGenerationEndTime = Date.now() / 1000;
-              console.log('zip end time', zipGenerationEndTime);
-              const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
-              console.log(`Zip generation took ${elapsedSeconds} seconds`);
-              return zipBlob;
-            } else {
-              console.error(`Failed to download file`);
-            }
+    async function generateZipData(zipFileUrls) {
+      try{
+      const zipGenerationStartTime = Date.now()/1000;
+      console.log('zip start time', zipGenerationStartTime)
+        console.log('file urls', zipFileUrls)
+        const response = await fetch(zipFileUrls);
+        console.log('response', response)
+        if (response.ok) {
+          const zipBlob = await response.blob();
+          const zipGenerationEndTime = Date.now() / 1000;
+          console.log('zip end time', zipGenerationEndTime);
+          const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
+          console.log(`Zip generation took ${elapsedSeconds} seconds`);
+          return zipBlob;
+        } else {
+          console.error(`Failed to download file`);
         }
+    }
+    catch (error) {
+      showAlert('error', {
+        title: 'Something went wrong'  
+    })
+    }
+  }
 
 
-          const checkStatus =(taskId) => {
-              checkTaskStatusApi(taskId)
-                  .then((response) => {
-                      if (response.data.success === true) {
-                        if(response?.data?.data){
-                          setProgress(prevProgress => prevProgress + 60);
-                          const splitVideoUrls = response.data.data;
-                          if (splitVideoUrls) {
-                            generateZipData(splitVideoUrls).then((zipBlob) => {
-                              navigate('/downloader', { state: { zipData: zipBlob } });
-                            });
-                          }
-                        
-                        
-                      }  
-                      }
-                      else {
-                        setTimeout(checkStatus(taskId), 10000);
-                           }
-                  })
-                
-          };
-        
-        
-    
-  
+    const checkStatus =(taskId) => {
+        checkTaskStatusApi(taskId)
+            .then((response) => {
+                if (response.data.success === true) {
+                  setProgress(prevProgress => prevProgress + 60);
+                  if(response?.data?.data){
+                    setProgress(prevProgress => prevProgress + 60);
+                    const splitVideoUrls = response.data.data;
+                    if (splitVideoUrls) {
+                      generateZipData(splitVideoUrls)
+                      .then((zipBlob) => {
+                        navigate('/downloader', { state: { zipData: zipBlob } });
+                      }) 
+                      .catch((err) => {
+                        showAlert('error', {
+                          title: err   
+                      })
+                    })
+                    }
+                  }  
+                }
+                else {
+                  setTimeout(checkStatus(taskId), 10000);
+                    }
+            })
+            .catch((err) => {
+              showAlert('error', {
+                title: err.message   
+            })
+            setShowProgressBar(false);
+            })
           
-    
-
+    };
+        
 
     const handleSubmit = (e) =>{
         
