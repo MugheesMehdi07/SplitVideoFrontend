@@ -1,6 +1,6 @@
 import axios from "axios";
 const dev_Url = "http://127.0.0.1:8000/"
-const default_prod_url = "https://usohyjw8i7.execute-api.us-east-2.amazonaws.com/";
+const default_prod_url = "https://in40ej6pj2.execute-api.us-east-2.amazonaws.com/";
 
 
 export function ProcesVideos(mainVideoPath, overlayVideoPath, variationsCount, styleType) {
