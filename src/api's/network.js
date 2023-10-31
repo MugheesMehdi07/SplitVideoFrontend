@@ -1,28 +1,21 @@
 import axios from "axios";
 const dev_Url = "http://127.0.0.1:8000/"
-const prod_url = "http://videoprocessingbackend.rootpointers.net/"
+const default_prod_url = "https://usohyjw8i7.execute-api.us-east-2.amazonaws.com/";
 
-export function ProcesVideos(params) {
-    console.log('process video called')
-    const headers = {
-      'Content-Type': 'multipart/form-data',
-    };
-    // const config = {
-    //   headers,
-    //   responseType: 'blob',
-    // };
-    return axios.post(prod_url + "generatevariations/", params, {headers});
+
+export function ProcesVideos(mainVideoPath, overlayVideoPath, variationsCount, styleType) {
+    console.log('process video called');
+    const prod_url = localStorage.getItem('prod_url') || default_prod_url;
+     // Construct the GET URL
+    const requestURL = `${prod_url}video_processor?video1_path=${encodeURIComponent(mainVideoPath)}&video2_path=${encodeURIComponent(overlayVideoPath)}&split_variations=${variationsCount}&style=${styleType}`;
+    console.log(requestURL);
+    return axios.get(requestURL);
 }
 
 export function checkTaskStatusApi(taskId) {
-  const params = {
-    'task_id': taskId
-  }
 
-  const headers = {
-    'Content-Type': 'application/json',
-  };
- 
+  const prod_url = localStorage.getItem('prod_url') || default_prod_url;
+  const requestURL = `${prod_url}task_status?task_id=${taskId}`;
   console.log('in checkTaskStatusApi')
-  return axios.post(prod_url + "checkstatus/", params, {headers});
+  return axios.get(requestURL);
 }

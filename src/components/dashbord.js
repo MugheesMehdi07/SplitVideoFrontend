@@ -185,72 +185,70 @@ const Dash = () => {
         }
 
 
-          const checkStatus =(taskId) => {
-              checkTaskStatusApi(taskId)
-                  .then((response) => {
-                      if (response.data.success === true) {
-                        if(response?.data?.data){
-                          setProgress(prevProgress => prevProgress + 60);
-                          const splitVideoUrls = response.data.data;
-                          if (splitVideoUrls) {
-                            generateZipData(splitVideoUrls).then((zipBlob) => {
-                              navigate('/downloader', { state: { zipData: zipBlob } });
-                            });
-                          }
-                        
-                        
-                      }  
-                      }
-                      else {
-                        setTimeout(checkStatus(taskId), 10000);
-                           }
-                  })
+        const checkStatus = (taskId) => {
+          checkTaskStatusApi(taskId)
+              .then((response) => {
+               
+                  setProgress(prevProgress => Math.min(prevProgress + 5, 95));
                 
-          };
-        
+                  
+                  if (response.data.task_status === "Completed") {
+                      setProgress(100);
+                      if (response?.data?.zip_url) {
+                          navigate('/downloader', { state: { zipData: response.data.zip_url } });
+                      }
+                  } else if (response.data.task_status === "Failed") {
+                      showAlert('error', {
+                          title: 'Video processing failed'
+                      });
+                      setShowProgressBar(false);
+                  } else {
+                      // If status is neither "Completed" nor "Failed", keep checking.
+                      setTimeout(() => checkStatus(taskId), 10000);
+                  }
+              })
+              .catch((err) => {
+                  showAlert('error', {
+                      title: err.message
+                  });
+                  setShowProgressBar(false);
+              });
+        };
         
     
   
-          
-    
-
-
-    const handleSubmit = (e) =>{
+          const handleSubmit = (e) => {
+            if (mainVideo && overlayVideo && variations) {
+                e.preventDefault();
         
-        if (mainVideo && overlayVideo && variations){
-          e.preventDefault();
-            const formData = new FormData();
-            formData.append('mainVideo', mainVideo);
-            formData.append('overlayVideo', overlayVideo);
-            formData.append('variations', variations);
-            formData.append('style', style);
-            setShowProgressBar(true)
-            setTimeout(() => {
-              setProgress(prevProgress => prevProgress + 10);
-            }, 10000);
-            ProcesVideos(formData)
-            
-            .then((res) => {
-              if (res?.data?.data){
-                const taskId = res.data.data;
-                setProgress(prevProgress => prevProgress + 20);
-                checkStatus(taskId)
-              }
-            })
-            .catch((err) => {
+                setShowProgressBar(true)
+                setTimeout(() => {
+                    setProgress(prevProgress => prevProgress + 5);
+                }, 10000);
+        
+                ProcesVideos(mainVideo, overlayVideo, variations, style)
+                    .then((res) => {
+                        console.log(res);
+                        if (res?.data?.task_id) {
+                            console.log("Got Task ID");
+                            const taskId = res.data.task_id;
+                            setProgress(prevProgress => prevProgress + 5);
+                            checkStatus(taskId)
+                        }
+                    })
+                    .catch((err) => {
+                        showAlert('error', {
+                            title: err.message
+                        })
+                        setShowProgressBar(false);
+                    })
+            }
+            else {
                 showAlert('error', {
-                    title: err.message   
+                    title: 'All fields are required'
                 })
-                setShowProgressBar(false);
-            })
-        }
-        else{
-        showAlert('error', {
-            title: 'all fields are required'     
-        })
-       }
-    }
-  
+            }
+          }
 
 
     return (

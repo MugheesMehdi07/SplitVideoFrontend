@@ -24,7 +24,7 @@ const Downloader = () => {
     }, [res])
 
    
-    function downloadFile(zipFileBytes, name) {
+    function downloadFile1(zipFileBytes, name) {
         const blob = new Blob([zipFileBytes], { type: 'application/octet-stream' });
       
         const zip = new JSZip();
@@ -67,7 +67,14 @@ const Downloader = () => {
       }
       
       
-          
+    function downloadFile(zipFile, filename) {
+        const link = document.createElement('a');
+        link.href = zipFile;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
           
           
           
