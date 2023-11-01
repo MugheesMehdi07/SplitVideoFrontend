@@ -14,7 +14,7 @@ import JSZip from 'jszip';
 const Dash = () => {
     const [mainVideo, setMainVideo] = useState(null);
     const [overlayVideo, setOverlayVideo] = useState(null);
-    const [variations, setVariations] = useState('');
+    const [variations, setVariations] = useState(0);
     const [style, setStyle] = useState('');
     const showAlert = useSweetAlert();
     const navigate = useNavigate();
@@ -140,30 +140,58 @@ const Dash = () => {
           };
 
           
-    async function generateZipData(zipFileUrls) {
-      try{
-      const zipGenerationStartTime = Date.now()/1000;
-      console.log('zip start time', zipGenerationStartTime)
-        console.log('file urls', zipFileUrls)
-        const response = await fetch(zipFileUrls);
-        console.log('response', response)
-        if (response.ok) {
-          const zipBlob = await response.blob();
-          const zipGenerationEndTime = Date.now() / 1000;
-          console.log('zip end time', zipGenerationEndTime);
-          const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
-          console.log(`Zip generation took ${elapsedSeconds} seconds`);
-          return zipBlob;
-        } else {
-          console.error(`Failed to download file`);
-        }
+//     async function generateZipData(videoUrls) {
+//       try{
+//         console.log('in generate zip')
+//       const zipGenerationStartTime = Date.now()/1000;
+//       console.log('zip start time', zipGenerationStartTime)
+//         console.log('file urls', zipFileUrls)
+//         const response = await fetch(zipFileUrls);
+//         console.log('response', response)
+//         if (response.ok) {
+//           const zipBlob = await response.blob();
+//           const zipGenerationEndTime = Date.now() / 1000;
+//           console.log('zip end time', zipGenerationEndTime);
+//           const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
+//           console.log(`Zip generation took ${elapsedSeconds} seconds`);
+//           return zipBlob;
+//         } else {
+//           console.error(`Failed to download file`);
+//         }
+//     }
+//     catch (error) {
+//       showAlert('error', {
+//         title: 'Something went wrong'  
+//     })
+//     }
+//   }
+async function generateZipFromUrls(videoUrls) {
+    try {
+        console.log('in generate zip func')
+        const zip = new JSZip();
+
+        // Fetch each video file and add it to the ZIP
+        await Promise.all(
+            videoUrls.map(async (url, index) => {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const fileBlob = await response.blob();
+                    zip.file(`video_${index}.mp4`, fileBlob); // Adjust the file name as needed
+                } else {
+                    console.error(`Failed to fetch file from ${url}`);
+                }
+            })
+        );
+
+        // Generate the ZIP blob
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        return zipBlob;
+    } catch (error) {
+        console.error('Error generating ZIP:', error);
+        return null; // Handle errors appropriately
     }
-    catch (error) {
-      showAlert('error', {
-        title: 'Something went wrong'  
-    })
-    }
-  }
+}
+
 
 
 
@@ -172,15 +200,34 @@ const Dash = () => {
               .then((response) => {
                
                   setProgress(prevProgress => Math.min(prevProgress + 5, 95));
-                  if (response && response.video_urls) {
-                    setVideoUrls(response.video_urls);
+                  console.log('task status response', response)
+                  if (response && response.data.video_urls) {
+                    console.log('in video url response', response.data.video_urls)
+                    console.log('type of video urls', typeof response.data.video_urls)
+                    setVideoUrls(response.data.video_urls);
+                    console.log('video url length', response.data.video_urls.length)
+                    console.log('variations are', variations)
+                    let len = response.data.video_urls.length;
+                    if ( len == variations) {
+                        console.log('video urls length is equall to variations')
+                        generateZipFromUrls(response.data.video_urls)
+                        .then((zipBlob) => {
+                            navigate('/downloader', { state: { zipData: zipBlob } });
+                        })
+                        //   .catch((error) => {
+                        //     showAlert('error', {
+                        //       title: 'Something went wrong',
+                        //     });
+                    }
+
                   }
                   
                   if (response.data.task_status === "Completed") {
                       setProgress(100);
-                      if (response?.data?.zip_url) {
-                          navigate('/downloader', { state: { zipData: response.data.zip_url } });
-                      }
+
+                    //   if (response?.data?.zip_url) {
+                    //       navigate('/downloader', { state: { zipData: response.data.zip_url } });
+                    //   }
                   } else if (response.data.task_status === "Failed") {
                       showAlert('error', {
                           title: 'Video processing failed'
@@ -335,15 +382,21 @@ const Dash = () => {
                         <p>Processing Videos</p>
                         </div>
                     )}
+                    {videoUrls && videoUrls.length > 0 && (
+                    <ul>
+                        <li>hello</li>
+                        {videoUrls.map((url, index) => (
+                            <li key={index}>
+                                <a href={url} target="_blank" rel="noopener noreferrer">
+                                    {url}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </form>
             <div>
-                <ul>
-                    {videoUrls.map((url, index) => (
-                        <li key={index}>
-                            <a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
-                        </li>
-                    ))}
-                </ul>
+            
             </div>   
                     
         </div>
