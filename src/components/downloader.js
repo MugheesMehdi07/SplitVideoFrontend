@@ -24,60 +24,73 @@ const Downloader = () => {
     }, [res])
 
    
-    function downloadFile1(zipFileBytes, name) {
-        const blob = new Blob([zipFileBytes], { type: 'application/octet-stream' });
+    // function downloadFile1(zipFileBytes, name) {
+    //     const blob = new Blob([zipFileBytes], { type: 'application/octet-stream' });
       
-        const zip = new JSZip();
-        zip.loadAsync(blob)
-          .then((zip) => {
-            const flattenedFiles = {};
+    //     const zip = new JSZip();
+    //     zip.loadAsync(blob)
+    //       .then((zip) => {
+    //         const flattenedFiles = {};
       
-            zip.forEach((relativePath, file) => {
-              // Remove any folder structure, keeping only the file name
-              const parts = relativePath.split('/');
-              const fileName = parts[parts.length - 1];
-              flattenedFiles[fileName] = file;
-            });
+    //         zip.forEach((relativePath, file) => {
+    //           // Remove any folder structure, keeping only the file name
+    //           const parts = relativePath.split('/');
+    //           const fileName = parts[parts.length - 1];
+    //           flattenedFiles[fileName] = file;
+    //         });
       
-            return flattenedFiles;
-          })
-          .then((flattenedFiles) => {
-            const zip = new JSZip();
-            Object.keys(flattenedFiles).forEach((fileName) => {
-              zip.file(fileName, flattenedFiles[fileName].async('arraybuffer'));
-            });
+    //         return flattenedFiles;
+    //       })
+    //       .then((flattenedFiles) => {
+    //         const zip = new JSZip();
+    //         Object.keys(flattenedFiles).forEach((fileName) => {
+    //           zip.file(fileName, flattenedFiles[fileName].async('arraybuffer'));
+    //         });
       
-            return zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-          })
-          .then((flattenedZipBlob) => {
-            // Here you can do something with the flattened ZIP blob
-            // For example, you can initiate a download
+    //         return zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    //       })
+    //       .then((flattenedZipBlob) => {
+    //         // Here you can do something with the flattened ZIP blob
+    //         // For example, you can initiate a download
+    //         const a = document.createElement('a');
+    //         document.body.appendChild(a);
+    //         a.style = 'display: none';
+    //         const url = window.URL.createObjectURL(flattenedZipBlob);
+    //         a.href = url;
+    //         a.download = name;
+    //         a.click();
+    //         window.URL.revokeObjectURL(url);
+    //         setTimeout(() => {
+    //             navigate('/'); 
+    //         }, 10000);
+    //       });
+    //   }
+      
+      
+    // function downloadFile(zipFile, filename) {
+    //     const link = document.createElement('a');
+    //     link.href = zipFile;
+    //     link.download = filename;
+    //     document.body.appendChild(link);
+    //     link.click();
+    //     document.body.removeChild(link);
+    // }
+          
+          
+    function downloadFile(zipBlob, name) {
+        if (zipBlob) {
+            // Use the zipBlob for download or any further processing
+            // For example, initiating a download:
+            const url = window.URL.createObjectURL(zipBlob);
             const a = document.createElement('a');
-            document.body.appendChild(a);
-            a.style = 'display: none';
-            const url = window.URL.createObjectURL(flattenedZipBlob);
             a.href = url;
-            a.download = name;
+            a.download = 'videos.zip'; // Set the ZIP file name
+            document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
-            setTimeout(() => {
-                navigate('/'); 
-            }, 10000);
-          });
-      }
-      
-      
-    function downloadFile(zipFile, filename) {
-        const link = document.createElement('a');
-        link.href = zipFile;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        }
     }
-          
-          
-          
+    
           
           
         
