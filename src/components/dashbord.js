@@ -22,6 +22,8 @@ const Dash = () => {
     const [showProgressBar, setShowProgressBar] = useState(false);
     const [mainUploadProgress, setMainUploadProgress] = useState(0);
     const [overlayUploadProgress, setOverlayUploadProgress] = useState(0);
+    const [videoUrls, setVideoUrls] = useState([]);
+
     const tolerance = 0.01;
 
 
@@ -170,7 +172,9 @@ const Dash = () => {
               .then((response) => {
                
                   setProgress(prevProgress => Math.min(prevProgress + 5, 95));
-                
+                  if (response && response.video_urls) {
+                    setVideoUrls(response.video_urls);
+                  }
                   
                   if (response.data.task_status === "Completed") {
                       setProgress(100);
@@ -332,7 +336,15 @@ const Dash = () => {
                         </div>
                     )}
             </form>
-                
+            <div>
+                <ul>
+                    {videoUrls.map((url, index) => (
+                        <li key={index}>
+                            <a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
+                        </li>
+                    ))}
+                </ul>
+            </div>   
                     
         </div>
     </div>
