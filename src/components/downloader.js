@@ -98,7 +98,7 @@ const Downloader = () => {
    
     return (
         <div className='parent1'>
-            <div className='parent-container '>
+            <div  class="parent-container">
                 <div className='child-container2'>
             <h6 style={{textAlign: 'center', color: '#0A2F73', fontFamily:'Plus Jakarta Sans'}}>CONTENT ROLLER</h6>
             <h3 style={{textAlign: 'center', color: '#0A2F73'}}>DOWNLOAD FILES</h3>

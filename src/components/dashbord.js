@@ -283,15 +283,17 @@ async function generateZipFromUrls(videoUrls) {
 
 
     return (
-        <div className='parent1'>
-            <div className='parent-container '>
-            <div className='child-container '>
+        // <div className='parent1'>
+            // <div className='parent-container '>
+            <div class= "row " id="parent-container" >
+                <div className='row d-flex'>
+            <div className='col-sm-8 d-flex flex-column'>
             <h6 style={{textAlign: 'center', color: '#0A2F73', fontFamily:'Plus Jakarta Sans'}}>CONTENT ROLLER</h6>
             <h3 style={{textAlign: 'center', color: '#0A2F73'}}>UPLOAD FILES</h3>
             
             <form className='m-5'>
             <div style={{textAlign: 'center', color: '#0A2F73'}}><label><b>Upload main video (Short):<span style={{color:'red'}}></span></b></label></div>
-            <div className= 'row' style={{marginLeft:'100px'}}>
+            <div className= 'row' style={{marginLeft:'120px'}}>
                 <div className="col-9 ">
                     <div className="form-group" style={{ position: 'relative' }}>
                         <input
@@ -313,7 +315,7 @@ async function generateZipFromUrls(videoUrls) {
             </div> 
 
             <div  style={{textAlign: 'center', color: '#0A2F73', marginTop: '10px'}}><label><b>Upload overlay video (Long):</b></label></div>
-                <div className= 'row' style={{marginLeft:'100px'}}>
+                <div className= 'row' style={{marginLeft:'120px'}}>
                     <div className="col-9">
                         <div className="form-group" style={{ position: 'relative' }}>
                             <input
@@ -382,9 +384,20 @@ async function generateZipFromUrls(videoUrls) {
                         <p>Processing Videos</p>
                         </div>
                     )}
-                    {videoUrls && videoUrls.length > 0 && (
-                    <ul>
-                        <li>hello</li>
+                    
+            </form>
+            <div>
+           
+            </div>   
+               
+        </div>
+        <div className='col-sm-4 d-flex flex-column'>
+            <div class='container'  style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                
+            {videoUrls && videoUrls.length > 0 && (
+                
+                    <ul style={{ listStyleType: 'disc' }}>
+                        <h4 className='text-align-center'>Video Urls</h4>
                         {videoUrls.map((url, index) => (
                             <li key={index}>
                                 <a href={url} target="_blank" rel="noopener noreferrer">
@@ -394,14 +407,10 @@ async function generateZipFromUrls(videoUrls) {
                         ))}
                     </ul>
                 )}
-            </form>
-            <div>
-            
-            </div>   
-                    
-        </div>
-    </div>
-</div>
+            </div>
+            </div> 
+            </div> 
+ </div>
         
     );
 };

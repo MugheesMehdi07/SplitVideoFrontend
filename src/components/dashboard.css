@@ -1,33 +1,46 @@
 html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
+    /* height: 100%; */
+    /* margin: 0;
+    padding: 0; */
+    background-color: #E4E8F0;
   }
 .parent1{
     background-color: #E4E8F0;
-    /* background-color: black; */
     padding: 5px 5px 5px 5px;
-    height: 100vh;
-    /* overflow: hidden;
-    box-sizing: border-box; */
+    height: 100vh; 
+    overflow: hidden;
+    box-sizing: border-box; 
 }
-.parent-container{
-    display: flex; /* Use flexbox to center vertically and horizontally */
-    justify-content: center; /* Center horizontally */
+#parent-container{
+    /* display: flex; */
+    justify-content: center;
     align-items: center;
     background-color: white; 
-    border-radius: 10px;
+    height: 100vh;
+    overflow: hidden;
+    /* /* border-radius: 10px; */
     margin: 10px;
     margin-top: 20px;
     padding:40px;
     min-height: 95vh;
-    max-height: 95vh;
+    max-height: 95vh; 
+}
+.parent-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white; 
+ border-radius: 10px;
+  margin: 10px;
+  margin-top: 20px;
+  padding:40px;
+  min-height: 95vh;
+  max-height: 95vh; 
 }
 .child-container{
-    background-color: white;
-    width:80%;
-    min-height: 80vh;
-    max-height: 90vh;
+    background-color: white; 
+    /* height:auto;
+    width: 100%; */
     
 }
 
