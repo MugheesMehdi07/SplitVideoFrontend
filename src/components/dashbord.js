@@ -23,7 +23,8 @@ const Dash = () => {
     const [mainUploadProgress, setMainUploadProgress] = useState(0);
     const [overlayUploadProgress, setOverlayUploadProgress] = useState(0);
     const [videoUrls, setVideoUrls] = useState([]);
-
+    const [checked, setChecked] = useState(false);
+    const [userId, setUserId] = useState('');
     const tolerance = 0.01;
 
 
@@ -139,61 +140,57 @@ const Dash = () => {
             }
           };
 
-          
-//     async function generateZipData(videoUrls) {
-//       try{
-//         console.log('in generate zip')
-//       const zipGenerationStartTime = Date.now()/1000;
-//       console.log('zip start time', zipGenerationStartTime)
-//         console.log('file urls', zipFileUrls)
-//         const response = await fetch(zipFileUrls);
-//         console.log('response', response)
-//         if (response.ok) {
-//           const zipBlob = await response.blob();
-//           const zipGenerationEndTime = Date.now() / 1000;
-//           console.log('zip end time', zipGenerationEndTime);
-//           const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
-//           console.log(`Zip generation took ${elapsedSeconds} seconds`);
-//           return zipBlob;
-//         } else {
-//           console.error(`Failed to download file`);
-//         }
+// async function generateZipFromUrls(videoUrls) {
+//     try {
+//         console.log('in generate zip func')
+//         const zip = new JSZip();
+
+//         // Fetch each video file and add it to the ZIP
+//         await Promise.all(
+//             videoUrls.map(async (url, index) => {
+//                 const response = await fetch(url);
+//                 if (response.ok) {
+//                     const fileBlob = await response.blob();
+//                     zip.file(`video_${index}.mp4`, fileBlob); // Adjust the file name as needed
+//                 } else {
+//                     console.error(`Failed to fetch file from ${url}`);
+//                 }
+//             })
+//         );
+
+//         // Generate the ZIP blob
+//         const zipBlob = await zip.generateAsync({ type: 'blob' });
+//         return zipBlob;
+//     } catch (error) {
+//         console.error('Error generating ZIP:', error);
+//         return null; // Handle errors appropriately
 //     }
-//     catch (error) {
-//       showAlert('error', {
-//         title: 'Something went wrong'  
-//     })
-//     }
+// }
+
+// async function generateZipData(zipFileUrls) {
+//     try{
+//     const zipGenerationStartTime = Date.now()/1000;
+//     console.log('zip start time', zipGenerationStartTime)
+//       console.log('file urls', zipFileUrls)
+//       const response = await fetch(zipFileUrls);
+//       console.log('response', response)
+//       if (response.ok) {
+//         const zipBlob = await response.blob();
+//         const zipGenerationEndTime = Date.now() / 1000;
+//         console.log('zip end time', zipGenerationEndTime);
+//         const elapsedSeconds = zipGenerationEndTime - zipGenerationStartTime;
+//         console.log(`Zip generation took ${elapsedSeconds} seconds`);
+//         return zipBlob;
+//       } else {
+//         console.error(`Failed to download file`);
+//       }
 //   }
-async function generateZipFromUrls(videoUrls) {
-    try {
-        console.log('in generate zip func')
-        const zip = new JSZip();
-
-        // Fetch each video file and add it to the ZIP
-        await Promise.all(
-            videoUrls.map(async (url, index) => {
-                const response = await fetch(url);
-                if (response.ok) {
-                    const fileBlob = await response.blob();
-                    zip.file(`video_${index}.mp4`, fileBlob); // Adjust the file name as needed
-                } else {
-                    console.error(`Failed to fetch file from ${url}`);
-                }
-            })
-        );
-
-        // Generate the ZIP blob
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        return zipBlob;
-    } catch (error) {
-        console.error('Error generating ZIP:', error);
-        return null; // Handle errors appropriately
-    }
-}
-
-
-
+//   catch (error) {
+//     showAlert('error', {
+//       title: 'Something went wrong'  
+//   })
+// }
+// }
 
       const checkStatus = (taskId) => {
           checkTaskStatusApi(taskId)
@@ -207,27 +204,27 @@ async function generateZipFromUrls(videoUrls) {
                     setVideoUrls(response.data.video_urls);
                     console.log('video url length', response.data.video_urls.length)
                     console.log('variations are', variations)
-                    let len = response.data.video_urls.length;
-                    if ( len == variations) {
-                        console.log('video urls length is equall to variations')
-                        generateZipFromUrls(response.data.video_urls)
-                        .then((zipBlob) => {
-                            navigate('/downloader', { state: { zipData: zipBlob } });
-                        })
+                    // let len = response.data.video_urls.length;
+                    // if ( len == variations) {
+                    //     console.log('video urls length is equall to variations')
+                    //     generateZipFromUrls(response.data.video_urls)
+                    //     .then((zipBlob) => {
+                    //         navigate('/downloader', { state: { zipData: zipBlob } });
+                    //     })
                         //   .catch((error) => {
                         //     showAlert('error', {
                         //       title: 'Something went wrong',
                         //     });
-                    }
+                    // }
 
                   }
                   
                   if (response.data.task_status === "Completed") {
                       setProgress(100);
 
-                    //   if (response?.data?.zip_url) {
-                    //       navigate('/downloader', { state: { zipData: response.data.zip_url } });
-                    //   }
+                      if (response?.data?.zip_url) {
+                          navigate('/downloader', { state: { zipData: response.data.zip_url } });
+                      }
                   } else if (response.data.task_status === "Failed") {
                       showAlert('error', {
                           title: 'Video processing failed'
@@ -249,6 +246,7 @@ async function generateZipFromUrls(videoUrls) {
     
   
           const handleSubmit = (e) => {
+            console.log('check box value', checked)
             if (mainVideo && overlayVideo && variations) {
                 e.preventDefault();
  
@@ -257,11 +255,11 @@ async function generateZipFromUrls(videoUrls) {
                     setProgress(prevProgress => prevProgress + 5);
                 }, 10000);
         
-                ProcesVideos(mainVideo, overlayVideo, variations, style)
+                ProcesVideos(mainVideo, overlayVideo, variations, style, checked, userId)
                     .then((res) => {
                         console.log(res);
                         if (res?.data?.task_id) {
-                            console.log("Got Task ID");
+                            console.log("Got Task ID", res.data.task_id);
                             const taskId = res.data.task_id;
                             setProgress(prevProgress => prevProgress + 5);
                             checkStatus(taskId)
@@ -287,13 +285,13 @@ async function generateZipFromUrls(videoUrls) {
             // <div className='parent-container '>
             <div class= "row " id="parent-container" >
                 <div className='row d-flex'>
-            <div className='col-sm-8 d-flex flex-column'>
+            <div className='col-sm-7 d-flex flex-column'>
             <h6 style={{textAlign: 'center', color: '#0A2F73', fontFamily:'Plus Jakarta Sans'}}>CONTENT ROLLER</h6>
             <h3 style={{textAlign: 'center', color: '#0A2F73'}}>UPLOAD FILES</h3>
             
-            <form className='m-5'>
+            <form className='pb-5'>
             <div style={{textAlign: 'center', color: '#0A2F73'}}><label><b>Upload main video (Short):<span style={{color:'red'}}></span></b></label></div>
-            <div className= 'row' style={{marginLeft:'120px'}}>
+            <div className= 'row' style={{marginLeft:'130px'}}>
                 <div className="col-9 ">
                     <div className="form-group" style={{ position: 'relative' }}>
                         <input
@@ -315,7 +313,7 @@ async function generateZipFromUrls(videoUrls) {
             </div> 
 
             <div  style={{textAlign: 'center', color: '#0A2F73', marginTop: '10px'}}><label><b>Upload overlay video (Long):</b></label></div>
-                <div className= 'row' style={{marginLeft:'120px'}}>
+                <div className= 'row' style={{marginLeft:'130px'}}>
                     <div className="col-9">
                         <div className="form-group" style={{ position: 'relative' }}>
                             <input
@@ -372,7 +370,33 @@ async function generateZipFromUrls(videoUrls) {
                     </div>
                 </div>
             </div>
-
+            <div className='row'>
+                <div className="col-6 mx-auto">
+                    <div className="form-group">
+                        <div><label style={{color: '#E3E8F2'}} for="userid">UserId:</label></div>
+                        <input
+                                type="text"
+                                className="form-control"
+                                id="userid"
+                                onChange={(e) => setUserId(e.target.value)}
+                                
+                            />
+                    </div>
+                </div>
+            </div>
+            <div className='row mt-1'>
+                <div className="col-6 mx-auto">
+                    <div class="form-check">
+                        <label class="form-check-label" for="flexCheckChecked">
+                            Checked checkbox
+                        </label>
+                        <input class="form-check-input" type="checkbox" id="flexCheckChecked"
+                        checked={checked}
+                        onChange={(e) => setChecked(!checked)}
+                        />     
+                    </div>
+                </div>
+            </div>
             <div className='container mt-3' style={{textAlign:'center'}}>   
                 <button type='button' className='btn btn-light' style={{border: '1px solid #D9D9D9', borderRadius:'10px' , marginRight: '10px', backgroundColor:'#D9D9D9', color: 'white' }}><b>Cancel</b></button>
                 <button type='button' onClick={handleSubmit} className='btn btn-light' style={{border: '1px solid #00B884', borderRadius:'10px' , backgroundColor:'#00B884', color: 'white'}} disabled={!mainVideo || !overlayVideo}><b>Generate Variations</b></button>
@@ -391,7 +415,7 @@ async function generateZipFromUrls(videoUrls) {
             </div>   
                
         </div>
-        <div className='col-sm-4 d-flex flex-column'>
+        <div className='col-sm-5 d-flex flex-column'>
             <div class='container'  style={{ maxHeight: '300px', overflowY: 'auto' }}>
                 
             {videoUrls && videoUrls.length > 0 && (
@@ -400,7 +424,7 @@ async function generateZipFromUrls(videoUrls) {
                         <h4 className='text-align-center'>Video Urls</h4>
                         {videoUrls.map((url, index) => (
                             <li key={index}>
-                                <a href={url} target="_blank" rel="noopener noreferrer">
+                                <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: 'black', textDecoration: 'none' }}>
                                     {url}
                                 </a>
                             </li>

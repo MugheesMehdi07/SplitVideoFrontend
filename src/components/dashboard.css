@@ -18,10 +18,10 @@ html, body {
     background-color: white; 
     height: 100vh;
     overflow: hidden;
-    /* /* border-radius: 10px; */
+    border-radius: 10px;
     margin: 10px;
     margin-top: 20px;
-    padding:40px;
+    padding:30px;
     min-height: 95vh;
     max-height: 95vh; 
 }

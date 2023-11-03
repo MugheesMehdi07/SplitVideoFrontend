@@ -5,13 +5,21 @@ const default_prod_url = "https://1nkljvfey0.execute-api.us-east-2.amazonaws.com
 
 
 
-export function ProcesVideos(mainVideoPath, overlayVideoPath, variationsCount, styleType) {
+export function ProcesVideos(mainVideoPath, overlayVideoPath, variationsCount, styleType, checked, userId) {
     console.log('process video called');
+    const params = {
+      'video1_path': mainVideoPath,
+      'video2_path': overlayVideoPath,
+      'split_variations': variationsCount,
+      'style': styleType,
+      'watermark': checked,
+      'userId': userId
+    }
     const prod_url = localStorage.getItem('prod_url') || default_prod_url;
+    console.log('production url', prod_url)
      // Construct the GET URL
     const requestURL = `${default_prod_url}video_processor?video1_path=${encodeURIComponent(mainVideoPath)}&video2_path=${encodeURIComponent(overlayVideoPath)}&split_variations=${variationsCount}&style=${styleType}`;
-    console.log(requestURL);
-    return axios.get(requestURL);
+    return axios.post(default_prod_url + "video_processor", params);
 }
 
 export function checkTaskStatusApi(taskId) {
