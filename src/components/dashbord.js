@@ -26,6 +26,8 @@ const Dash = () => {
     const [checked, setChecked] = useState(false);
     const [userId, setUserId] = useState('');
     const tolerance = 0.01;
+    const [captionText, setCaptionText] = useState('');
+    const [showCaptionInput, setShowCaptionInput] = useState(false);
 
 
 
@@ -140,6 +142,20 @@ const Dash = () => {
             }
           };
 
+          const handleStyleChange = (e) => {
+            setStyle(e.target.value);
+            if (e.target.value === 'caption') {
+              setShowCaptionInput(true);
+            } else {
+              setShowCaptionInput(false);
+            }
+          };
+          const handleCaptionInputChange = (e) => {
+            if (e.target.value.length <= 50) {
+                console.log('in handle caption input change')
+              setCaptionText(e.target.value);
+            }
+          };
 // async function generateZipFromUrls(videoUrls) {
 //     try {
 //         console.log('in generate zip func')
@@ -247,7 +263,7 @@ const Dash = () => {
   
           const handleSubmit = (e) => {
             console.log('check box value', checked)
-            if (mainVideo && overlayVideo && variations) {
+            if (mainVideo && variations) {
                 e.preventDefault();
  
                 setShowProgressBar(true)
@@ -255,7 +271,7 @@ const Dash = () => {
                     setProgress(prevProgress => prevProgress + 5);
                 }, 10000);
         
-                ProcesVideos(mainVideo, overlayVideo, variations, style, checked, userId)
+                ProcesVideos(mainVideo, overlayVideo, variations, style, checked, userId, captionText)
                     .then((res) => {
                         console.log(res);
                         if (res?.data?.task_id) {
@@ -362,14 +378,31 @@ const Dash = () => {
                 <div className="col-6 mx-auto">
                     <div className="form-group">
                         <div><label style={{color: '#E3E8F2'}}>select style:</label></div>
-                        <select className='form-select' onChange={(e) => setStyle(e.target.value)}>
+                        <select className='form-select' onChange={handleStyleChange}>
                             <option value="" hidden></option>
                             <option value="overlay">Overlay</option>
                             <option value="shrink">Shrink</option>
+                            <option value="border">Border</option>
+                            <option value="caption">Caption</option>
                         </select>    
                     </div>
                 </div>
             </div>
+            {showCaptionInput && (
+                <div className='row mt-2'>
+                <div className="col-6 mx-auto">
+                <div className="form-group">
+                <input
+                type="text"
+                className="form-control"
+                value={captionText}
+                onChange={handleCaptionInputChange}
+                placeholder="Enter caption (max 50 characters)"
+                />
+                </div>
+            </div>
+        </div>
+            )}
             <div className='row'>
                 <div className="col-6 mx-auto">
                     <div className="form-group">
@@ -399,7 +432,7 @@ const Dash = () => {
             </div>
             <div className='container mt-3' style={{textAlign:'center'}}>   
                 <button type='button' className='btn btn-light' style={{border: '1px solid #D9D9D9', borderRadius:'10px' , marginRight: '10px', backgroundColor:'#D9D9D9', color: 'white' }}><b>Cancel</b></button>
-                <button type='button' onClick={handleSubmit} className='btn btn-light' style={{border: '1px solid #00B884', borderRadius:'10px' , backgroundColor:'#00B884', color: 'white'}} disabled={!mainVideo || !overlayVideo}><b>Generate Variations</b></button>
+                <button type='button' onClick={handleSubmit} className='btn btn-light' style={{border: '1px solid #00B884', borderRadius:'10px' , backgroundColor:'#00B884', color: 'white'}} disabled={!mainVideo}><b>Generate Variations</b></button>
             </div>  
             
             {showProgressBar && (
