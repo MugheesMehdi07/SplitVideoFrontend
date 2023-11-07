@@ -5,7 +5,7 @@ const default_prod_url = "https://1nkljvfey0.execute-api.us-east-2.amazonaws.com
 
 
 
-export function ProcesVideos(mainVideoPath, overlayVideoPath, variationsCount, styleType, checked, userId, captionText) {
+export function ProcesVideos(mainVideoPath, overlayVideoPath, variationsCount, styleType, checked, userId, captionText, liveUrl) {
     console.log('process video called');
     const params = {
       'video1_path': mainVideoPath,
@@ -14,7 +14,8 @@ export function ProcesVideos(mainVideoPath, overlayVideoPath, variationsCount, s
       'style': styleType,
       'watermark': checked,
       'userId': userId,
-      'caption': captionText
+      'caption': captionText,
+      'live_url': liveUrl
     }
     const prod_url = localStorage.getItem('prod_url') || default_prod_url;
     console.log('production url', prod_url)

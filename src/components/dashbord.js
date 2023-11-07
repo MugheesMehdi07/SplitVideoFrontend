@@ -25,9 +25,11 @@ const Dash = () => {
     const [videoUrls, setVideoUrls] = useState([]);
     const [checked, setChecked] = useState(false);
     const [userId, setUserId] = useState('');
+    const [rollerId, setRollerId] = useState('');
     const tolerance = 0.01;
     const [captionText, setCaptionText] = useState('');
     const [showCaptionInput, setShowCaptionInput] = useState(false);
+    const [liveUrl, setLiveUrl] = useState(false);
 
 
 
@@ -92,7 +94,7 @@ const Dash = () => {
             if (data?.Location){
             const s3FileUrl = data.Location;
             console.log('s3 file url', s3FileUrl)
-            setMainVideo(s3FileUrl)
+            setMainVideo("https://processed-videos-1.s3.amazonaws.com/templates/Minecraft+clips+under+750+mb/lv_0_20231104072853.mp4")
             }
           } catch (err) {
             console.error('Error uploading file:', err);
@@ -125,7 +127,8 @@ const Dash = () => {
                 if (data?.Location){
                 const s3FileUrl = data.Location;
                 console.log('File URL:', s3FileUrl);
-                setOverlayVideo(s3FileUrl)
+                // setOverlayVideo(s3FileUrl)
+                setOverlayVideo("https://a3b97bf62070e9308ef7877ceeb2851d.cdn.bubble.io/f1699013952220x388022461467099100/download.mp4")
                 }
               } catch (err) {
                 showAlert('error', {
@@ -271,7 +274,7 @@ const Dash = () => {
                     setProgress(prevProgress => prevProgress + 5);
                 }, 10000);
         
-                ProcesVideos(mainVideo, overlayVideo, variations, style, checked, userId, captionText)
+                ProcesVideos(mainVideo, overlayVideo, variations, style, checked, userId, captionText, liveUrl)
                     .then((res) => {
                         console.log(res);
                         if (res?.data?.task_id) {
@@ -383,7 +386,7 @@ const Dash = () => {
                             <option value="overlay">Overlay</option>
                             <option value="shrink">Shrink</option>
                             <option value="border">Border</option>
-                            <option value="caption">Caption</option>
+                            <option value="caption">Meme</option>
                         </select>    
                     </div>
                 </div>
@@ -421,11 +424,37 @@ const Dash = () => {
                 <div className="col-6 mx-auto">
                     <div class="form-check">
                         <label class="form-check-label" for="flexCheckChecked">
-                            Checked checkbox
+                            Watermark
                         </label>
                         <input class="form-check-input" type="checkbox" id="flexCheckChecked"
                         checked={checked}
                         onChange={(e) => setChecked(!checked)}
+                        />     
+                    </div>
+                </div>
+            </div>
+            <div className='row mt-1'>
+                <div className="col-6 mx-auto">
+                    <div class="form-check">
+                        <label class="form-check-label" for="liveurl">
+                            Live Url
+                        </label>
+                        <input class="form-check-input" type="checkbox" id="liveurl"
+                        checked={liveUrl}
+                        onChange={(e) => setLiveUrl(!checked)}
+                        />     
+                    </div>
+                </div>
+            </div>
+            <div className='row mt-1'>
+                <div className="col-6 mx-auto">
+                    <div class="form-group">
+                        <label for="rollerId">
+                            Roller Id
+                        </label>
+                        <input class="form-control" type="text" id="rollerId"
+                        checked={rollerId}
+                        onChange={(e) => setRollerId(e.target.value)}
                         />     
                     </div>
                 </div>
