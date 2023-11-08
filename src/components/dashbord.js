@@ -29,7 +29,7 @@ const Dash = () => {
     const tolerance = 0.01;
     const [captionText, setCaptionText] = useState('');
     const [showCaptionInput, setShowCaptionInput] = useState(false);
-    const [liveUrl, setLiveUrl] = useState(false);
+    const [liveVersion, setLiveVersion] = useState(false);
 
 
 
@@ -94,7 +94,8 @@ const Dash = () => {
             if (data?.Location){
             const s3FileUrl = data.Location;
             console.log('s3 file url', s3FileUrl)
-            setMainVideo("https://processed-videos-1.s3.amazonaws.com/templates/Minecraft+clips+under+750+mb/lv_0_20231104072853.mp4")
+            setMainVideo(s3FileUrl)
+            // setMainVideo("https://processed-videos-1.s3.amazonaws.com/templates/Minecraft+clips+under+750+mb/lv_0_20231104072853.mp4")
             }
           } catch (err) {
             console.error('Error uploading file:', err);
@@ -127,8 +128,8 @@ const Dash = () => {
                 if (data?.Location){
                 const s3FileUrl = data.Location;
                 console.log('File URL:', s3FileUrl);
-                // setOverlayVideo(s3FileUrl)
-                setOverlayVideo("https://a3b97bf62070e9308ef7877ceeb2851d.cdn.bubble.io/f1699013952220x388022461467099100/download.mp4")
+                setOverlayVideo(s3FileUrl)
+                // setOverlayVideo("https://a3b97bf62070e9308ef7877ceeb2851d.cdn.bubble.io/f1699013952220x388022461467099100/download.mp4")
                 }
               } catch (err) {
                 showAlert('error', {
@@ -274,7 +275,7 @@ const Dash = () => {
                     setProgress(prevProgress => prevProgress + 5);
                 }, 10000);
         
-                ProcesVideos(mainVideo, overlayVideo, variations, style, checked, userId, captionText, liveUrl)
+                ProcesVideos(mainVideo, overlayVideo, variations, style, checked, userId, captionText, liveVersion, rollerId)
                     .then((res) => {
                         console.log(res);
                         if (res?.data?.task_id) {
@@ -305,13 +306,13 @@ const Dash = () => {
             <div class= "row " id="parent-container" >
                 <div className='row d-flex'>
             <div className='col-sm-7 d-flex flex-column'>
-            <h6 style={{textAlign: 'center', color: '#0A2F73', fontFamily:'Plus Jakarta Sans'}}>CONTENT ROLLER</h6>
-            <h3 style={{textAlign: 'center', color: '#0A2F73'}}>UPLOAD FILES</h3>
+            <div className='col-10'><h6 style={{textAlign: 'center', color: '#0A2F73', fontFamily:'Plus Jakarta Sans'}}>CONTENT ROLLER</h6></div>
+            <div className='col-10'><h3 style={{textAlign: 'center', color: '#0A2F73'}}>UPLOAD FILES</h3></div>
             
             <form className='pb-5'>
-            <div style={{textAlign: 'center', color: '#0A2F73'}}><label><b>Upload main video (Short):<span style={{color:'red'}}></span></b></label></div>
-            <div className= 'row' style={{marginLeft:'130px'}}>
-                <div className="col-9 ">
+            <div style={{textAlign: 'center', color: '#0A2F73'}} className='col-10'><label><b>Upload main video (Short):<span style={{color:'red'}}></span></b></label></div>
+            <div className= 'row'>
+                <div className="col-10 ">
                     <div className="form-group" style={{ position: 'relative' }}>
                         <input
                             type="file"
@@ -324,16 +325,16 @@ const Dash = () => {
                         </label>
                     </div>
                 </div>
-                <div className="col-3 ">
+                <div className="col-2 ">
                 {mainUploadProgress > 0 && mainUploadProgress < 100 - tolerance && (
                 <ProgressBar now={parseInt(mainUploadProgress)} label={`${parseInt(mainUploadProgress)}%`} variant = "success" animated />
             )}  
                 </div>
             </div> 
 
-            <div  style={{textAlign: 'center', color: '#0A2F73', marginTop: '10px'}}><label><b>Upload overlay video (Long):</b></label></div>
-                <div className= 'row' style={{marginLeft:'130px'}}>
-                    <div className="col-9">
+            <div  style={{textAlign: 'center', color: '#0A2F73', marginTop: '10px'}} className='col-10'><label><b>Upload overlay video (Long):</b></label></div>
+                <div className= 'row'>
+                    <div className="col-10">
                         <div className="form-group" style={{ position: 'relative' }}>
                             <input
                                 type="file"
@@ -347,7 +348,7 @@ const Dash = () => {
                             </label>
                         </div>
                     </div>
-                     <div className="col-3">
+                     <div className="col-2">
                      {overlayUploadProgress > 0 && overlayUploadProgress < 100 - tolerance && (
                         <ProgressBar now={parseInt(overlayUploadProgress)} label={`${parseInt(overlayUploadProgress)}%`} variant = "success" animated />
                     )}
@@ -355,7 +356,7 @@ const Dash = () => {
                 </div>
 
             <div className='row mt-3'>
-                <div className="col-6 mx-auto">
+                <div className="col-5">
                      <div className="form-group">
                         <div><label style={{color: '#E3E8F2'}}>select # of variations:</label></div>
                         <select  class="form-select" 
@@ -375,10 +376,10 @@ const Dash = () => {
                         </select>  
                     </div>
                 </div>
-            </div>
+            {/* </div>
 
-            <div className='row'>
-                <div className="col-6 mx-auto">
+            <div className='row'> */}
+                <div className="col-5">
                     <div className="form-group">
                         <div><label style={{color: '#E3E8F2'}}>select style:</label></div>
                         <select className='form-select' onChange={handleStyleChange}>
@@ -392,8 +393,7 @@ const Dash = () => {
                 </div>
             </div>
             {showCaptionInput && (
-                <div className='row mt-2'>
-                <div className="col-6 mx-auto">
+                <div className="col-10 mt-2">
                 <div className="form-group">
                 <input
                 type="text"
@@ -404,10 +404,9 @@ const Dash = () => {
                 />
                 </div>
             </div>
-        </div>
             )}
             <div className='row'>
-                <div className="col-6 mx-auto">
+                <div className="col-5">
                     <div className="form-group">
                         <div><label style={{color: '#E3E8F2'}} for="userid">UserId:</label></div>
                         <input
@@ -419,9 +418,20 @@ const Dash = () => {
                             />
                     </div>
                 </div>
+                <div className="col-5">
+                    <div class="form-group">
+                        <label for="rollerId" style={{color: '#E3E8F2'}} >
+                            Roller Id
+                        </label>
+                        <input class="form-control" type="text" id="rollerId"
+                        checked={rollerId}
+                        onChange={(e) => setRollerId(e.target.value)}
+                        />     
+                    </div>
+                </div>
             </div>
             <div className='row mt-1'>
-                <div className="col-6 mx-auto">
+                <div className="col-5">
                     <div class="form-check">
                         <label class="form-check-label" for="flexCheckChecked">
                             Watermark
@@ -432,21 +442,21 @@ const Dash = () => {
                         />     
                     </div>
                 </div>
-            </div>
-            <div className='row mt-1'>
-                <div className="col-6 mx-auto">
+            {/* </div>
+            <div className='row mt-1'> */}
+                <div className="col-5">
                     <div class="form-check">
-                        <label class="form-check-label" for="liveurl">
-                            Live Url
+                        <label class="form-check-label" for="liveversion">
+                            Live Version
                         </label>
-                        <input class="form-check-input" type="checkbox" id="liveurl"
-                        checked={liveUrl}
-                        onChange={(e) => setLiveUrl(!checked)}
+                        <input class="form-check-input" type="checkbox" id="liveversion"
+                        checked={liveVersion}
+                        onChange={(e) => setLiveVersion(!liveVersion)}
                         />     
                     </div>
                 </div>
             </div>
-            <div className='row mt-1'>
+            {/* <div className='row mt-1'>
                 <div className="col-6 mx-auto">
                     <div class="form-group">
                         <label for="rollerId">
@@ -458,14 +468,14 @@ const Dash = () => {
                         />     
                     </div>
                 </div>
-            </div>
-            <div className='container mt-3' style={{textAlign:'center'}}>   
+            </div> */}
+            <div className='col-10 mt-3' style={{textAlign:'center'}}>   
                 <button type='button' className='btn btn-light' style={{border: '1px solid #D9D9D9', borderRadius:'10px' , marginRight: '10px', backgroundColor:'#D9D9D9', color: 'white' }}><b>Cancel</b></button>
                 <button type='button' onClick={handleSubmit} className='btn btn-light' style={{border: '1px solid #00B884', borderRadius:'10px' , backgroundColor:'#00B884', color: 'white'}} disabled={!mainVideo}><b>Generate Variations</b></button>
             </div>  
             
             {showProgressBar && (
-            <div className='mt-3' style={{width: '70%', textAlign: 'center', marginLeft: '70px'}}> 
+            <div className='mt-3' style={{width: '70%', textAlign: 'center', marginLeft: '50px'}}> 
                         <ProgressBar now={progress} label={`${progress}%` } variant = "success"/>
                         <p>Processing Videos</p>
                         </div>
@@ -476,7 +486,7 @@ const Dash = () => {
            
             </div>   
                
-        </div>
+                </div>
         <div className='col-sm-5 d-flex flex-column'>
             <div class='container'  style={{ maxHeight: '300px', overflowY: 'auto' }}>
                 
