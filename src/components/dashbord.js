@@ -88,6 +88,7 @@ const Dash = () => {
       
         if (selectedFile && selectedFile.type.startsWith('video/')) {
           try {
+            console.log('in main file')
             const filename = generateUniqueFileName(selectedFile)
             const key = `main/${filename}`;
             const data = await  uploadFile(key, selectedFile);
@@ -95,7 +96,7 @@ const Dash = () => {
             const s3FileUrl = data.Location;
             console.log('s3 file url', s3FileUrl)
             setMainVideo(s3FileUrl)
-            // setMainVideo("https://processed-videos-1.s3.amazonaws.com/templates/Minecraft+clips+under+750+mb/lv_0_20231104072853.mp4")
+            // setMainVideo("https://processed-videos-1.s3.amazonaws.com/main/20231110134503039Z.mp4")
             }
           } catch (err) {
             console.error('Error uploading file:', err);
@@ -148,7 +149,7 @@ const Dash = () => {
 
           const handleStyleChange = (e) => {
             setStyle(e.target.value);
-            if (e.target.value === 'caption') {
+            if (e.target.value === 'meme') {
               setShowCaptionInput(true);
             } else {
               setShowCaptionInput(false);
@@ -387,7 +388,7 @@ const Dash = () => {
                             <option value="overlay">Overlay</option>
                             <option value="shrink">Shrink</option>
                             <option value="border">Border</option>
-                            <option value="caption">Meme</option>
+                            <option value="meme">Meme</option>
                         </select>    
                     </div>
                 </div>
